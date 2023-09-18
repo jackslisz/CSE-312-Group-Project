@@ -1,6 +1,8 @@
+#Taken from lecture:
 version: '3'
 services:
   app:
     build: .
     ports:
+    #Mapping the proper ports
       - '8080:8080'
