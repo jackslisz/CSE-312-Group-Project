@@ -6,10 +6,10 @@ body {
 
 /*Editing h1 element*/
 h1 {
-    /*Adding a red border around any h1 element 4 pixels wide*/
-    border: 4px hsl(0, 100%, 50%) solid;
-    /*Setting the text color to red in any h1 element*/
-    color: rgb(255, 0, 0);
+    /*Adding a green border around any h1 element 4 pixels wide*/
+    border: 4px hsl(131, 100%, 29%) solid;
+    /*Setting the text color to green in any h1 element*/
+    color: rgb(0, 155, 0);
     /*Center-aligning any h1 element*/
     text-align: center;
     /*Adding 10 pixels of padding to any h1 element*/
