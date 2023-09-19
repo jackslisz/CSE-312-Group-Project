@@ -6,6 +6,8 @@
 <head>
     <!--Ensuring UTF-8 encoding-->
     <meta charset="UTF-8">
+    <!--Adding the style.css file to this file-->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename= 'css/style.css') }}">
     <!--Displaying the title of the tab-->
     <title>CSE-312 Project - Part 1</title>
 </head>
@@ -14,7 +16,9 @@
 <body> 
     <!--Displaying some text-->
     <h1>Hello!</h1>
-    <p>This is the home page.</p>
+    <p>Welcome to my project!</p>
+    <!--Displaying the picture clip_art.png-->
+    <image src="{{ url_for('static', filename='img/clip_art.png')}}", width="960", height="486", class="center">
 </body>
 
 <!--End of HTML file-->

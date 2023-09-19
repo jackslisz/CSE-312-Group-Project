@@ -1,0 +1,36 @@
+/*Editing body element*/
+body {
+    /*Setting the background color of the body element*/
+    background: rgb(79, 220, 255);
+}
+
+/*Editing h1 element*/
+h1 {
+    /*Adding a red border around any h1 element 4 pixels wide*/
+    border: 4px hsl(0, 100%, 50%) solid;
+    /*Setting the text color to red in any h1 element*/
+    color: rgb(255, 0, 0);
+    /*Center-aligning any h1 element*/
+    text-align: center;
+    /*Adding 10 pixels of padding to any h1 element*/
+    padding: 10px;
+}
+
+/*Editing p element*/
+p {
+    /*Center-aligning any p element*/
+    text-align: center;
+    /*Adding 10 pixels of padding to any p element*/
+    padding: 10px;
+}
+
+/*Editing center class*/
+.center {
+    /*Making the center class element into a block element*/
+    display: block;
+    /*Adjusting the margins on either side of a center class element*/
+    margin-left: auto;
+    margin-right: auto;
+    /*Adjusting the width of the center class element*/
+    width: 50%;
+}
