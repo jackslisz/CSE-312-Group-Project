@@ -1,36 +1,67 @@
-/*Editing body element*/
+
 body {
-    /*Setting the background color of the body element*/
-    background: rgb(79, 220, 255);
+    background-color: #000000;
+    color: white;
 }
 
-/*Editing h1 element*/
-h1 {
-    /*Adding a green border around any h1 element 4 pixels wide*/
-    border: 4px hsl(131, 100%, 29%) solid;
-    /*Setting the text color to green in any h1 element*/
-    color: rgb(0, 155, 0);
-    /*Center-aligning any h1 element*/
-    text-align: center;
-    /*Adding 10 pixels of padding to any h1 element*/
-    padding: 10px;
+.my_image {
+    /*width: 120px;*/
+    height: 80%;
 }
 
-/*Editing p element*/
-p {
-    /*Center-aligning any p element*/
-    text-align: center;
-    /*Adding 10 pixels of padding to any p element*/
-    padding: 10px;
+img.post {
+    width: 120px;
 }
 
-/*Editing center class*/
-.center {
-    /*Making the center class element into a block element*/
-    display: block;
-    /*Adjusting the margins on either side of a center class element*/
-    margin-left: auto;
-    margin-right: auto;
-    /*Adjusting the width of the center class element*/
-    width: 50%;
+.title{
+    height: 5%;
+}
+
+.header{
+    display: flex;
+    /*justify-content: space-around;*/
+    background-color: #F6F1F1;
+    color: black;
+    height: 17%;
+    align-items: center;
+}
+
+.contents{
+    display: flex;
+    justify-content: space-around;
+    height: 78%
+}
+
+.chat{
+    /*height:100%;*/
+    width: 70%;
+    background-color: #146C94;
+    padding: 20px;
+    /*overflow: scroll;*/
+}
+
+#chat-messages{
+    height: 90%;
+    /*width: 70%;*/
+    /*background-color: aqua;*/
+    /*padding: 20px;*/
+    overflow: scroll;
+}
+
+.chat-form{
+    /*width: 70%;*/
+    /*background-color: aqua;*/
+    /*padding: 20px;*/
+    /*overflow: scroll;*/
+    height: 30px;
+}
+
+.user-list{
+    width: 30%;
+    background-color: #19A7CE;
+    padding: 20px;
+}
+
+.header > div{
+    padding: 20px;
 }

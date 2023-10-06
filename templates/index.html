@@ -1,27 +1,74 @@
-<!--Taken from lecture:-->
-<!DOCTYPE html>
-<html lang="en">
-
-<!--Start of the header block-->
+<html>
 <head>
-    <!--Ensuring UTF-8 encoding-->
-    <meta charset="UTF-8">
-    <!--Adding the style.css file to this file-->
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css')}}">
-    <!--Displaying the title of the tab-->
-    <title>CSE-312 Project - Part 1</title>
+    <title>CSE312 Homework App</title>
+    <link rel="icon" type="image/jpg" href="static/img/eagle.jpg"/>
+    <link rel="stylesheet" type="text/css" href="static/css/style.css"/>
 </head>
 
-<!--Start of the body block-->
-<body> 
-    <!--Displaying some text-->
-    <h1>Hello!</h1>
-    <!--Displaying what is in the script.js file-->
-    <p id="use_js">This text will be replaced with JavaScript!</p>
-    <script type="text/javascript" src="{{ url_for('static', filename='js/script.js')}}"></script>
-    <!--Displaying the picture clip_art.png-->
-    <image type="image/png" src="{{ url_for('static', filename='img/clip_art.png')}}", width="960", height="486", class="center">
-</body>
+<body onload="welcome();">
 
-<!--End of HTML file-->
+<div class="title">
+    <h2>CSE312 App</h2>
+</div>
+
+<div class="header">
+    <div>
+        <img src="static/img/eagle.jpg" alt="It's an eagle" class="my_image"/></div>
+    <div>
+        <p id="paragraph">
+            This will be replaced by JavaScript
+        </p>
+    </div>
+</div>
+
+
+<div class="contents">
+    <div class="chat">
+        <div id="chat-messages">
+        </div>
+
+        <div class="chat-form">
+            <hr>
+            <label>
+                Chat:
+                <input id="chat-text-box" type="text">
+            </label>
+            <button id="chat-button" onclick="sendChat()">Send</button>
+        </div>
+
+    </div>
+    <div class="user-list">
+
+
+        Register:
+        <form action="/register" method="post" enctype="application/x-www-form-urlencoded">
+            <label>Username:
+                <input id="reg-form-username" type="text" name="username_reg"/>
+            </label>
+            <br/>
+            <label>Password:&nbsp;
+                <input id="reg-form-pass" type="password" name="password_reg">
+            </label>
+            <input type="submit" value="Post">
+        </form>
+
+        Login:
+        <form action="/login" method="post" enctype="application/x-www-form-urlencoded">
+            <label>Username:
+                <input id="login-form-username" type="text" name="username_login"/>
+            </label>
+            <br/>
+            <label>Password:&nbsp;
+                <input id="login-form-pass" type="password" name="password_login">
+            </label>
+            <input type="submit" value="Post">
+        </form>
+
+
+    </div>
+</div>
+
+
+<script src="static/js/functions.js"></script>
+</body>
 </html>
