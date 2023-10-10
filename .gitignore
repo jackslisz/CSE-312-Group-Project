@@ -1,0 +1,2 @@
+#Ignoring any virtual enviroments
+.env
