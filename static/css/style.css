@@ -1,67 +1,73 @@
-
+/* Changing all occurrences of body to have properties below */
 body {
-    background-color: #000000;
-    color: white;
+    background-color: #313131;
+    color: rgb(255, 255, 255);
 }
 
+/* Changing all occurrences of class my_image to have properties below */
 .my_image {
-    /*width: 120px;*/
     height: 80%;
 }
 
+/* Changing all occurrences of class post to have properties below */
 img.post {
     width: 120px;
 }
 
+/* Changing all occurrences of class title to have properties below */
 .title{
     height: 5%;
+    text-align: center;
+    color: rgb(75, 255, 117);
 }
 
+/* Changing all occurrences of class header to have properties below */
 .header{
     display: flex;
-    /*justify-content: space-around;*/
-    background-color: #F6F1F1;
-    color: black;
+    background-color: #5c5c5c;
+    color: rgb(75, 255, 117);
     height: 17%;
     align-items: center;
 }
 
+/* Changing all occurrences of class contents to have properties below */
 .contents{
     display: flex;
     justify-content: space-around;
     height: 78%
 }
 
+/* Changing all occurrences of class chat to have properties below */
 .chat{
-    /*height:100%;*/
     width: 70%;
-    background-color: #146C94;
+    background-color: #313131;
     padding: 20px;
-    /*overflow: scroll;*/
 }
 
+/* Changing all occurrences of chat-messages to have properties below */
 #chat-messages{
     height: 90%;
-    /*width: 70%;*/
-    /*background-color: aqua;*/
-    /*padding: 20px;*/
     overflow: scroll;
 }
 
+/* Changing all occurrences of class chat-form to have properties below */
 .chat-form{
-    /*width: 70%;*/
-    /*background-color: aqua;*/
-    /*padding: 20px;*/
-    /*overflow: scroll;*/
     height: 30px;
 }
 
+/* Changing all occurrences of class user-list to have properties below */
 .user-list{
     width: 30%;
-    background-color: #19A7CE;
+    background-color: #313131;
+    margin-left:  125px;
+}
+
+/* Changing all occurrences of class header to have properties below */
+.header > div{
     padding: 20px;
 }
 
-.header > div{
-    padding: 20px;
+/* Creating a class to display blank vertical space */
+.vertical_space{
+    margin-bottom:  175px;
 }

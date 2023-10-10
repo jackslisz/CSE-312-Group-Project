@@ -1,8 +1,16 @@
 #Taken from lecture:
-version: '3'
+version: '3.3'
 services:
+  #Adding MongoDB to the compose file
+  mongo:
+    image: mongo:7.0.1
+    ports:
+      - '27017:27017'
   app:
     build: .
+    #Setting enviroment variables
+    environment:
+      WAIT_HOSTS: mongo:27017
+    #Mapping the correct ports for the container
     ports:
-    #Mapping the proper ports
       - '8080:8080'

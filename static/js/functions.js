@@ -68,7 +68,7 @@ function welcome() {
         }
     });
 
-    document.getElementById("paragraph").innerHTML = "<br/>Welcome to CSE312 Social. You're one stop for chat, image sharing, and DMs 🙂";
+    document.getElementById("paragraph").innerHTML = "<br/>Welcome to the best chat system ever!!! Here you can chat and share images with other users 🤠";
     document.getElementById("chat-text-box").focus();
 
     updateChat();
