@@ -1,9 +1,15 @@
 #Importing Flask framework and render_template, make_response, request, and send_from_directory modules
 from flask import Flask, render_template, make_response, request, send_from_directory
+#Importing JSON module
+from json import *
+#Importing functions from dbhandler.py
+from util.dbhandler import *
 
 #Creating Flask app instance and storing it in app
 #__name__ holds the name of current Python module
 app = Flask(__name__)
+#Initializing the Database (DB)
+db = db_init()
 
 #Decorators to turn Python function home_page into Flask view function
 @app.route("/")
@@ -66,6 +72,33 @@ def visit_counter_cookie():
     response.set_cookie('visit_counter', str(int(visit_count) + 1), max_age=3600) 
     #Returning the finished response
     return response
+
+#Decorator to turn Python function chat_message into Flask view function
+@app.route('/chat-message', methods=["POST"])
+def chat_message():
+    #Updating the unique ID of the new message
+    update_id(db)
+    #Retrieving the entire body of the request by calling get_data()
+    body = request.get_data().decode()
+    #Splitting the body at the colon to separate the message
+    body = body.split(":", 1)
+    #Inserting the message into the DB using splicing
+    insert_message(db, body[1][1:-2])
+    #Calling make_response to make an empty flask response
+    return make_response(f"")
+
+#Decorator to turn Python function chat_history into Flask view function
+@app.route('/chat-history')
+def chat_history():
+    #Checking if the chat's history is not empty
+    if get_chat_history(db):
+        #Dumping the entire chat history into a JSON string
+        chat_history = dumps(list(get_chat_history(db))).encode()
+        #Calling make_response to make a response using the JSON object in chat_history
+        return make_response(chat_history)
+    #Otherwise, calling make_response to make an empty flask response
+    else:
+        return make_response(f"")
 
 #Checking if __name__ is the name of top-level environment of program
 if __name__ == "__main__":
