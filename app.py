@@ -1,7 +1,8 @@
-#Importing Flask framework and render_template, make_response, request, and send_from_directory modules
-from flask import Flask, render_template, make_response, request, send_from_directory
-#Importing JSON module
+#Importing Flask and json modules
+from flask import *
 from json import *
+#Importing HTML escape function
+from html import escape
 #Importing functions from dbhandler.py
 from util.dbhandler import *
 
@@ -99,6 +100,25 @@ def chat_history():
     #Otherwise, calling make_response to make an empty flask response
     else:
         return make_response(f"")
+    
+#Decorator to turn Python function register_user into Flask view function
+@app.route('/register', methods=["POST"])
+def register_user():
+    #Retrieving the entire body of the request by calling get_data()
+    creds = request.get_data().decode()
+    #Splitting the body to store the username (0) and password (1) inside creds
+    creds = creds.split('&', 1)
+    #Removing key from username/password to leave just the username/password
+    creds[0] = creds[0].replace("username_reg=", "")
+    creds[1] = creds[1].replace("password_reg=", "")
+    #Escaping any HTML tags that user put in their username
+    creds[0] = escape(creds[0])
+    #Inserting creds into DB by calling function from dbhandler.py
+    store_creds(db, creds)
+    #Removing the password from the credentials array
+    creds[1] = ""
+    #Sending a redirect to the home page by calling redirect() and url_for()
+    return redirect(url_for('home_page'))
 
 #Checking if __name__ is the name of top-level environment of program
 if __name__ == "__main__":

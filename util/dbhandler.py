@@ -1,5 +1,6 @@
-#Importing MongoDB
+#Importing MongoDB and bcrypt modules
 from pymongo import MongoClient
+from bcrypt import *
 
 #Initialization function for both collections within the DB
 def db_init():
@@ -11,11 +12,11 @@ def db_init():
     #Creating collection to reference usernames and passwords
     creds_collection = db["credentials"]
     #Creating collection to account for unique IDs
-    counter = db["counter"]
+    counter_collection = db["counter"]
     #Checking if the counter collection is initialized already
-    if counter.count_documents({}) == 0:
+    if counter_collection.count_documents({}) == 0:
         #If not, initializing it to 0
-        counter.insert_one({'count': 0})  
+        counter_collection.insert_one({'count': 0})  
     #Returning the entire DB to access both collections
     return db
 
@@ -29,14 +30,23 @@ def get_chat_history(db):
 #Function to increment the unique ID value in the counter collection
 def update_id(db):
     #Re-establishing the collection to account for unique IDs
-    counter = db["counter"]
+    counter_collection = db["counter"]
     #Calling the update_one function to increment the current ID value
-    counter.update_one({}, {"$set": {"count": counter.find_one({},{}).get("count") + 1}})
+    counter_collection.update_one({}, {"$set": {"count": counter_collection.find_one({},{}).get("count") + 1}})
 
 #Function to insert a message into DB
 def insert_message(db, message):
     #Re-establishing collections to account for chat history and unique IDs
     chat_collection = db["chat"]
-    counter = db["counter"]
+    counter_collection = db["counter"]
     #Calling the insert_one function to insert the message into the DB
-    chat_collection.insert_one({"username": "Guest", "message": message, "id": int(counter.find_one({},{}).get("count"))})
+    chat_collection.insert_one({"username": "Guest", "message": message, "id": int(counter_collection.find_one({},{}).get("count"))})
+
+#Function to store new credentials from a registration request in the DB
+def store_creds(db, creds):
+    #Re-establishing the collection to reference the credentials
+    creds_collection = db["credentials"]
+    #Creating the salted and hashed password and storing it back in credentials array
+    creds[1] = hashpw(creds[1].encode(), gensalt())
+    #Calling the insert_one function to insert creds into the DB
+    creds_collection.insert_one({"username": creds[0], "password": creds[1], "auth_token": b""})
