@@ -5,7 +5,9 @@ from json import *
 from html import escape
 #Importing functions from dbhandler.py
 from util.dbhandler import *
-
+import secrets
+import hashlib
+import bcrypt
 #Creating Flask app instance and storing it in app
 #__name__ holds the name of current Python module
 app = Flask(__name__)
@@ -83,8 +85,16 @@ def chat_message():
     body = request.get_data().decode()
     #Splitting the body at the colon to separate the message
     body = body.split(":", 1)
-    #Inserting the message into the DB using splicing
-    insert_message(db, body[1][1:-2])
+    #Retriving the authentication token
+    auth_token_from_browser=request.cookies.get('auth_token', None)
+    # SH256 encrypting the authentication token to check with the database
+    encrypt = hashlib.sha256()
+    encrypt_auth_token = auth_token_from_browser
+    encrypt.update(encrypt_auth_token.encode())
+    #Checking whether the dabase contains that auth token 
+    if(get_auth_tokens(db,encrypt_auth_token)):
+        #Inserting the message into the DB using splicing
+        insert_message(db, body[1][1:-2],get_auth_tokens(db,encrypt_auth_token)["username"])
     #Calling make_response to make an empty flask response
     return make_response(f"")
 
@@ -119,6 +129,35 @@ def register_user():
     creds[1] = ""
     #Sending a redirect to the home page by calling redirect() and url_for()
     return redirect(url_for('home_page'))
+
+@app.route("/login", methods=["POST"])
+def login_page():
+    #Retrieve the data 
+    json_log_data=request.get_data().decode().split("&")
+    #Obtain the unencrypted password
+    unencrypted_password = json_log_data[1].split("=")[1]
+    #Obtain username
+    username = json_log_data[0].split("=")[1]
+    #Run a function ot check whether the username andpassword match the databse
+    authentication_attempt = check_creds(db, [username,unencrypted_password])
+    if(authentication_attempt):
+        #Create, Hash and store a random auth token
+        gen_auth_token = secrets.token_urlsafe(16)
+        encrypt = hashlib.sha256()
+        encrypt_auth_token = gen_auth_token
+        encrypt.update(encrypt_auth_token.encode())
+        add_auth(db,authentication_attempt,encrypt_auth_token)
+        response=make_response("You are authenticated!!!!!!!!!",200)
+        #Make cookie of auth_token
+        response.set_cookie('auth_token', gen_auth_token, max_age=3600, httponly=True) 
+
+    else:
+        #Return error message 405
+        response=make_response("You are not authenticated!!!!!!!!!",405)
+        response.headers["Content-Type"]="application/json"
+        # return response
+    return response
+
 
 #Checking if __name__ is the name of top-level environment of program
 if __name__ == "__main__":
