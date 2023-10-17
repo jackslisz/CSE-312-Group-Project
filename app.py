@@ -87,10 +87,13 @@ def chat_message():
     body = body.split(":", 1)
     #Retriving the authentication token
     auth_token_from_browser=request.cookies.get('auth_token', None)
+
     # SH256 encrypting the authentication token to check with the database
-    encrypt = hashlib.sha256()
-    encrypt_auth_token = auth_token_from_browser
-    encrypt.update(encrypt_auth_token.encode())
+    #Check for cookie
+    if(auth_token_from_browser):
+        encrypt = hashlib.sha256()
+        encrypt_auth_token = auth_token_from_browser
+        encrypt.update(encrypt_auth_token.encode())
     #Checking whether the dabase contains that auth token 
     if(get_auth_tokens(db,encrypt_auth_token)):
         #Inserting the message into the DB using splicing
@@ -158,6 +161,13 @@ def login_page():
         # return response
     return response
 
+@app.route("/chat-like", methods=["POST"])
+def like_message():
+    print("kfkdk")
+    body = request.get_data().decode()
+    #Splitting the body at the colon to separate the message
+    body = body
+    get_msg_and_like(db,body)
 
 #Checking if __name__ is the name of top-level environment of program
 if __name__ == "__main__":
