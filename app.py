@@ -82,8 +82,14 @@ def visit_counter_cookie():
 def chat_message():
     #Retrieving the entire body of the request by calling get_data()
     body = request.get_data().decode()
-    #Splitting the body at the colon to separate the message
-    body = body.split(":", 1)
+    #Splitting the body at the comma to separate the title from the description
+    body = body.split(",", 1)
+    #Removing the key from the title value, leaving just the title the user entered
+    body[0] = body[0].replace("{\"Title\":\"", "")
+    body[0] = body[0][0:-1]
+    #Removing the key from the description value, leaving just the description the user entered
+    body[1] = body[1].replace("\"Description\":\"", "")
+    body[1] = body[1][0:-2]
     #Retrieving the authentication token
     auth_token_from_browser = request.cookies.get('auth_token', None)
     #Checking if the user has an auth token present
@@ -95,7 +101,7 @@ def chat_message():
             #If so, updating the unique ID of the new message
             update_id(db)
             #Inserting the message into the DB using splicing
-            insert_message(db, body[1][1:-2], get_auth_tokens(db, encrypt_auth_token)["username"])
+            insert_message(db, body, get_auth_tokens(db, encrypt_auth_token)["username"])
     #Calling make_response to make an empty flask response
     return make_response(f"")
 
@@ -141,7 +147,7 @@ def login_page():
     #Obtain username
     username = json_log_data[0].split("=")[1]
     #Run a function to check whether the username and password match in the DB
-    authentication_attempt = check_creds(db, [username,unencrypted_password])
+    authentication_attempt = check_creds(db, [username, unencrypted_password])
     if(authentication_attempt):
         #If successful, create, Hash and store a random auth token
         gen_auth_token = token_urlsafe(16)
@@ -151,6 +157,8 @@ def login_page():
         encrypt_auth_token = sha256(encrypt_auth_token.encode()).digest()
         #Calling add_auth to add the token to the DB
         add_auth(db, authentication_attempt, encrypt_auth_token)
+        #Calling the update_html function to display the user's username
+        update_html(username)
         #Calling make_response to make and send a Flask response
         response = redirect(url_for('home_page'))
         #Make cookie of auth_token

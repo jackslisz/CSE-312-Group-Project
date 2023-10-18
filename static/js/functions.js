@@ -11,10 +11,11 @@ function deleteMessage(messageId) {
 
 function chatMessageHTML(messageJSON) {
     const username = messageJSON.username;
-    const message = messageJSON.message;
+    const title = messageJSON.title;
+    const description = messageJSON.description;
     const messageId = messageJSON.id;
     let messageHTML = "<br><button onclick='deleteMessage(" + messageId + ")'>X</button> ";
-    messageHTML += "<span id='message_" + messageId + "'><b>" + username + "</b>: " + message + "</span>";
+    messageHTML += "<span id='message_" + messageId + "'><b>" + username + "</b>: " + description + "</span>";
     return messageHTML;
 }
 
@@ -31,16 +32,19 @@ function addMessageToChat(messageJSON) {
 }
 
 function sendChat() {
-    const chatTextBox = document.getElementById("chat-text-box");
-    const message = chatTextBox.value;
-    chatTextBox.value = "";
+    const title_text_box = document.getElementById("title-text-box");
+    const title = title_text_box.value;
+    title_text_box.value = "";
+    const description_text_box = document.getElementById("description-text-box");
+    const description = description_text_box.value;
+    description_text_box.value = "";
     const request = new XMLHttpRequest();
     request.onreadystatechange = function () {
         if (this.readyState === 4 && this.status === 200) {
             console.log(this.response);
         }
     }
-    const messageJSON = {"message": message};
+    const messageJSON = {"Title": title, "Description": description};
     request.open("POST", "/chat-message");
     request.send(JSON.stringify(messageJSON));
     chatTextBox.focus();
