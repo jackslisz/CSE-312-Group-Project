@@ -1,6 +1,9 @@
-#Importing Flask and json modules
+#Importing Flask, json, secrets, hashlib, and bcrypt modules
 from flask import *
 from json import *
+from secrets import *
+from hashlib import *
+from bcrypt import *
 #Importing HTML escape function
 from html import escape
 #Importing functions from dbhandler.py
@@ -77,14 +80,22 @@ def visit_counter_cookie():
 #Decorator to turn Python function chat_message into Flask view function
 @app.route('/chat-message', methods=["POST"])
 def chat_message():
-    #Updating the unique ID of the new message
-    update_id(db)
     #Retrieving the entire body of the request by calling get_data()
     body = request.get_data().decode()
     #Splitting the body at the colon to separate the message
     body = body.split(":", 1)
-    #Inserting the message into the DB using splicing
-    insert_message(db, body[1][1:-2])
+    #Retrieving the authentication token
+    auth_token_from_browser = request.cookies.get('auth_token', None)
+    #Checking if the user has an auth token present
+    if auth_token_from_browser is not None:
+        #Hashing the token by calling the SHA256 function
+        encrypt_auth_token = sha256(auth_token_from_browser.encode()).digest()
+        #Checking whether the DB contains that auth token 
+        if(get_auth_tokens(db, encrypt_auth_token)):
+            #If so, updating the unique ID of the new message
+            update_id(db)
+            #Inserting the message into the DB using splicing
+            insert_message(db, body[1][1:-2], get_auth_tokens(db, encrypt_auth_token)["username"])
     #Calling make_response to make an empty flask response
     return make_response(f"")
 
@@ -119,6 +130,36 @@ def register_user():
     creds[1] = ""
     #Sending a redirect to the home page by calling redirect() and url_for()
     return redirect(url_for('home_page'))
+
+#Decorator to turn Python function login_page into Flask view function
+@app.route("/login", methods=["POST"])
+def login_page():
+    #Retrieve the data 
+    json_log_data = request.get_data().decode().split("&")
+    #Obtain the unencrypted password
+    unencrypted_password = json_log_data[1].split("=")[1]
+    #Obtain username
+    username = json_log_data[0].split("=")[1]
+    #Run a function to check whether the username and password match in the DB
+    authentication_attempt = check_creds(db, [username,unencrypted_password])
+    if(authentication_attempt):
+        #If successful, create, Hash and store a random auth token
+        gen_auth_token = token_urlsafe(16)
+        #Calling gen_auth_token to generate a new auth token value for user
+        encrypt_auth_token = gen_auth_token
+        #Hashing the token by calling the SHA256 function
+        encrypt_auth_token = sha256(encrypt_auth_token.encode()).digest()
+        #Calling add_auth to add the token to the DB
+        add_auth(db, authentication_attempt, encrypt_auth_token)
+        #Calling make_response to make and send a Flask response
+        response = redirect(url_for('home_page'))
+        #Make cookie of auth_token
+        response.set_cookie('auth_token', gen_auth_token, max_age=3600, httponly=True) 
+    #Otherwise, returning error message 401
+    else:
+        response = abort(401)
+    #Returning the Flask response
+    return response
 
 #Checking if __name__ is the name of top-level environment of program
 if __name__ == "__main__":
