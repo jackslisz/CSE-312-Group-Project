@@ -72,7 +72,7 @@ img.post {
     margin-bottom:  100px;
 }
 
-/* Creating a class to display blank the user's username */
+/* Creating a class to display the user's username */
 .display_username{
     color: rgb(75, 255, 117);
 }

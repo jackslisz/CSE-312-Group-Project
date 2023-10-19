@@ -9,13 +9,25 @@ function deleteMessage(messageId) {
     request.send();
 }
 
+function like_post(messageId) {
+    const request = new XMLHttpRequest();
+    request.onreadystatechange = function () {
+        if (this.readyState === 4 && this.status === 200) {
+            console.log(this.response);
+        }
+    }
+    request.open("POST", "/chat-message/" + messageId);
+    request.send();
+}
+
 function chatMessageHTML(messageJSON) {
     const username = messageJSON.username;
     const title = messageJSON.title;
     const description = messageJSON.description;
     const messageId = messageJSON.id;
-    let messageHTML = "<br><button onclick='deleteMessage(" + messageId + ")'>X</button> ";
-    messageHTML += "<span id='message_" + messageId + "'><b>" + username + "</b>: " + title + "</b>: " + description + "</span>";
+    let messageHTML = "<br><button onclick='deleteMessage(" + messageId + ")'>❌</button>&nbsp;&nbsp;&nbsp;";
+    messageHTML += "<button onclick='like_post(" + messageId + ")'>💓</button>";
+    messageHTML += "<span id='message_" + messageId + "'>&nbsp;&nbsp;&nbsp;" + username + ": <h2>" + title + "</h2>" + description + "</span>";
     return messageHTML;
 }
 
