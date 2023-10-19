@@ -34,17 +34,25 @@
         <div class="chat-form">
             <hr>
             <label>
-                Chat:
-                <input id="chat-text-box" type="text">
+                Title:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <input id="title-text-box" type="text">
             </label>
-            <button id="chat-button" onclick="sendChat()">Send</button>
+            <p></p>
+            <label>
+                Description:
+                <input id="description-text-box" type="text">
+            </label>
+            <button id="chat-button" onclick="sendChat()">Post</button>
         </div>
     </div>
 
     <div class="user-list">
-        <!-- Displaying username -->
-        <p class="display_username">You are currently logged in as: Guest</p>
         <!-- Displaying vertical space -->
+        <p class="vertical_space"></p>
+        <!-- Displaying username -->
+        <p class="display_username">You are currently logged in as: {{username}}</p>
+        <!-- Displaying vertical space -->
+        <p class="vertical_space"></p>
         <p class="vertical_space"></p>
         <!-- Registration form -->
         Register:
@@ -60,6 +68,8 @@
         </form>
 
         <!-- Displaying vertical space -->
+        <p class="vertical_space"></p>
+        <p class="vertical_space"></p>
         <p class="vertical_space"></p>
         <!-- Login form -->
         Login:

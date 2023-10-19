@@ -19,9 +19,20 @@ db = db_init()
 @app.route("/")
 @app.route("/home")
 def home_page():
-    #Calling render_template to look for and open the file index.html
-    #Calling make_response to make a flask response to edit headers and MIME types
-    response = make_response(render_template('index.html'))
+    #Retrieving the authentication token from browser
+    auth_token_from_browser = request.cookies.get('auth_token', None)
+    #Checking if the user has an auth token present
+    if auth_token_from_browser is not None:
+        #If so, hashing the token by calling the SHA256 function
+        encrypt_auth_token = sha256(auth_token_from_browser.encode()).digest()
+        #Checking whether the DB contains that auth token, if not setting db_result to hold an empty dictionary
+        db_result = get_auth_tokens(db, encrypt_auth_token) if get_auth_tokens(db, encrypt_auth_token) != None else {}
+        #If so, calling render_template to look for and open the file index.html
+        #Calling make_response to make a flask response to edit headers and MIME types
+        response = make_response(render_template('index_template.html', username=db_result.get("username", 'Guest')))
+    #Otherwise, replacing the template with the username "Guest"
+    else:
+        response = make_response(render_template('index_template.html', username='Guest'))
     #Setting the nosniff header
     response.headers['X-Content-Type-Options'] = 'nosniff'
     #Setting the correct MIME type for HTML
@@ -85,10 +96,10 @@ def chat_message():
     #Splitting the body at the comma to separate the title from the description
     body = body.split(",", 1)
     #Removing the key from the title value, leaving just the title the user entered
-    body[0] = body[0].replace("{\"Title\":\"", "")
+    body[0] = body[0].replace("{\"title\":\"", "")
     body[0] = body[0][0:-1]
     #Removing the key from the description value, leaving just the description the user entered
-    body[1] = body[1].replace("\"Description\":\"", "")
+    body[1] = body[1].replace("\"description\":\"", "")
     body[1] = body[1][0:-2]
     #Retrieving the authentication token
     auth_token_from_browser = request.cookies.get('auth_token', None)
@@ -114,9 +125,6 @@ def chat_history():
         chat_history = dumps(list(get_chat_history(db))).encode()
         #Calling make_response to make a response using the JSON object in chat_history
         return make_response(chat_history)
-    #Otherwise, calling make_response to make an empty flask response
-    else:
-        return make_response(f"")
     
 #Decorator to turn Python function register_user into Flask view function
 @app.route('/register', methods=["POST"])
@@ -157,8 +165,6 @@ def login_page():
         encrypt_auth_token = sha256(encrypt_auth_token.encode()).digest()
         #Calling add_auth to add the token to the DB
         add_auth(db, authentication_attempt, encrypt_auth_token)
-        #Calling the update_html function to display the user's username
-        update_html(username)
         #Calling make_response to make and send a Flask response
         response = redirect(url_for('home_page'))
         #Make cookie of auth_token

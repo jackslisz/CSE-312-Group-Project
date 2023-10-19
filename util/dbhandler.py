@@ -42,7 +42,7 @@ def insert_message(db, body, username):
     chat_collection = db["chat"]
     counter_collection = db["counter"]
     #Calling the insert_one function to insert the message into the DB
-    chat_collection.insert_one({"username": username, "Title": escape(body[0]), "Description": escape(body[1]), "id": int(counter_collection.find_one({},{}).get("count"))})
+    chat_collection.insert_one({"username": username, "title": escape(body[0]), "description": escape(body[1]), "id": int(counter_collection.find_one({},{}).get("count"))})
 
 #Function to store new credentials from a registration request in the DB
 def store_creds(db, creds):
@@ -94,23 +94,3 @@ def get_auth_tokens(db,auth_token_from_browser):
     creds_collection = db["credentials"]
     #Checking whether the browser's auth token matches that of the user. There can only be one auth token at a time
     return creds_collection.find_one({"auth_token":auth_token_from_browser})
-
-#Function to update any HTML files to include an authenticated user's username
-def update_html(username):
-    #Opening the template.html file to give the user a randomized XSRF token
-    with open("templates/template.html", "r") as template_file:
-        #Getting the HTML held in template_file and storing them in requested_data
-        requested_data = template_file.read()
-    #Replacing the {{xsrf_token}} line from template.html to hold a proper XSRF token with a random value
-    requested_data = requested_data.replace("Guest", username)
-    #Opening the index.html file to store the users randomized XSRF token
-    with open("templates/index.html", "r+") as index_file:
-        #Removing all data from index_file
-        index_file.truncate()
-        temp_data = index_file.read()
-        print(temp_data)
-        print(requested_data)
-        #Writing index_file with the updated and correct HTML
-        index_file.write(requested_data)
-        temp_data = index_file.read()
-        print(temp_data)

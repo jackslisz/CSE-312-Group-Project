@@ -15,7 +15,7 @@ function chatMessageHTML(messageJSON) {
     const description = messageJSON.description;
     const messageId = messageJSON.id;
     let messageHTML = "<br><button onclick='deleteMessage(" + messageId + ")'>X</button> ";
-    messageHTML += "<span id='message_" + messageId + "'><b>" + username + "</b>: " + description + "</span>";
+    messageHTML += "<span id='message_" + messageId + "'><b>" + username + "</b>: " + title + "</b>: " + description + "</span>";
     return messageHTML;
 }
 
@@ -44,7 +44,7 @@ function sendChat() {
             console.log(this.response);
         }
     }
-    const messageJSON = {"Title": title, "Description": description};
+    const messageJSON = {"title": title, "description": description};
     request.open("POST", "/chat-message");
     request.send(JSON.stringify(messageJSON));
     chatTextBox.focus();
@@ -73,7 +73,7 @@ function welcome() {
     });
 
     document.getElementById("paragraph").innerHTML = "<br/>Welcome to the best chat system ever!!! Here you can chat and share images with other users 🤠";
-    document.getElementById("chat-text-box").focus();
+    document.getElementById("chat-messages").focus();
 
     updateChat();
     setInterval(updateChat, 2000);
