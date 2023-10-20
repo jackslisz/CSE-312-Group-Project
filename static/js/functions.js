@@ -19,7 +19,7 @@ function likeMessage(messageId){
     console.log(messageId)
     request.open("POST", "/chat-like");
     request.send(JSON.stringify({"messageId":messageId}));
-    request.send();
+    // request.send();
 }
 
 function chatMessageHTML(messageJSON) {
