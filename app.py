@@ -175,7 +175,6 @@ def login_page():
     #Returning the Flask response
     return response
 
-<<<<<<< HEAD
 #Decorator to turn Python function like_message into Flask view function
 @app.route("/chat-like", methods=["POST"])
 def like_message():
@@ -193,25 +192,6 @@ def like_message():
         get_msg_and_like(db, encrypt_auth_token, json.loads(body)["messageId"])
     #Calling make_response to make and send a Flask response
     return redirect(url_for('home_page'))
-=======
-@app.route("/chat-like", methods=["POST"])
-def like_message():
-    body = request.get_data().decode()
-    #Splitting the body at the colon to separate the message
-    body = body
-    # print(body)
-    auth_token_from_browser=request.cookies.get('auth_token', None)
-    # SH256 encrypting the authentication token to check with the database. This is to ensure only logged-in users are able to like
-    #Check for cookie
-    if(auth_token_from_browser):
-        encrypt = sha256()
-        encrypt_auth_token = sha256(auth_token_from_browser.encode()).digest()
-        # encrypt.update(encrypt_auth_token.encode())
-        #Call function to like/unlike a message
-        get_msg_and_like(db,encrypt_auth_token,json.loads(body)["messageId"])
-    response=make_response("You are authenticated!!!!!!!!!",200)
-    return response
->>>>>>> fe4c7302fb598675024c6941611ecc60174ec965
 
 #Checking if __name__ is the name of top-level environment of program
 if __name__ == "__main__":

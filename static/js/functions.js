@@ -26,9 +26,6 @@ function chatMessageHTML(messageJSON) {
     const username = messageJSON.username;
     const title = messageJSON.title;
     const likes = messageJSON.likes;
-<<<<<<< HEAD
-    // console.log(likes)
-    // console.log(messageJSON)
     const description = messageJSON.description;
     const messageId = messageJSON.id;
     let messageHTML =  
@@ -40,15 +37,6 @@ function chatMessageHTML(messageJSON) {
     <p>${description}</p>
 	<button onclick='likeMessage(${messageId})'>💓&nbsp;(${likes})</button><br></br>
     </div>`
-=======
-    console.log(likes)
-    console.log(messageJSON)
-    const description = messageJSON.description;
-    const messageId = messageJSON.id;
-    let messageHTML = "<br><button onclick='deleteMessage(" + messageId + ")'>❌</button>&nbsp;&nbsp;&nbsp;";
-    messageHTML += "<span id='message_" + messageId + "'>&nbsp;&nbsp;&nbsp;" + username + ": <h2>" + title + "</h2>" + description + "</span>";
-    messageHTML += "<button onclick='likeMessage(" + messageId + ")'>💓("+likes+")</button>";
->>>>>>> fe4c7302fb598675024c6941611ecc60174ec965
     return messageHTML;
 }
 
