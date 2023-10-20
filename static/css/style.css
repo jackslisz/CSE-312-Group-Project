@@ -76,3 +76,10 @@ img.post {
 .display_username{
     color: rgb(75, 255, 117);
 }
+
+/* Creating a class to display the all chat messages */
+.new_chat_message{
+    /* flex: 200px; */
+    display: inline;
+    /*flex-flow: row wrap;*/
+}

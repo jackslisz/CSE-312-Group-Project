@@ -9,25 +9,36 @@ function deleteMessage(messageId) {
     request.send();
 }
 
-function like_post(messageId) {
+function likeMessage(messageId){
     const request = new XMLHttpRequest();
     request.onreadystatechange = function () {
         if (this.readyState === 4 && this.status === 200) {
             console.log(this.response);
         }
     }
-    request.open("POST", "/chat-message/" + messageId);
+    console.log(messageId)
+    request.open("POST", "/chat-like");
+    request.send(JSON.stringify({"messageId":messageId}));
     request.send();
 }
 
 function chatMessageHTML(messageJSON) {
     const username = messageJSON.username;
     const title = messageJSON.title;
+    const likes = messageJSON.likes;
+    // console.log(likes)
+    // console.log(messageJSON)
     const description = messageJSON.description;
     const messageId = messageJSON.id;
-    let messageHTML = "<br><button onclick='deleteMessage(" + messageId + ")'>❌</button>&nbsp;&nbsp;&nbsp;";
-    messageHTML += "<button onclick='like_post(" + messageId + ")'>💓</button>";
-    messageHTML += "<span id='message_" + messageId + "'>&nbsp;&nbsp;&nbsp;" + username + ": <h2>" + title + "</h2>" + description + "</span>";
+    let messageHTML =  
+    `<div class=new_chat_message>
+	<button onclick='deleteMessage(${messageId})'>❌</button>&nbsp;
+	<span id='message_${messageId}'>${username}: <font size="+2"><b>${title}</b></font></span>
+    </div>
+    <div>
+    <p>${description}</p>
+	<button onclick='likeMessage(${messageId})'>💓&nbsp;(${likes})</button><br></br>
+    </div>`
     return messageHTML;
 }
 
@@ -59,7 +70,7 @@ function sendChat() {
     const messageJSON = {"title": title, "description": description};
     request.open("POST", "/chat-message");
     request.send(JSON.stringify(messageJSON));
-    chatTextBox.focus();
+    title_text_box.focus();
 }
 
 function updateChat() {

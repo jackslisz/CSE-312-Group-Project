@@ -42,7 +42,7 @@ def insert_message(db, body, username):
     chat_collection = db["chat"]
     counter_collection = db["counter"]
     #Calling the insert_one function to insert the message into the DB
-    chat_collection.insert_one({"username": username, "title": escape(body[0]), "description": escape(body[1]), "id": int(counter_collection.find_one({},{}).get("count"))})
+    chat_collection.insert_one({"username": username, "title": escape(body[0]), "description": escape(body[1]), "id": int(counter_collection.find_one({},{}).get("count")),"likes":0, "likers":[]})
 
 #Function to store new credentials from a registration request in the DB
 def store_creds(db, creds):
@@ -94,3 +94,37 @@ def get_auth_tokens(db,auth_token_from_browser):
     creds_collection = db["credentials"]
     #Checking whether the browser's auth token matches that of the user. There can only be one auth token at a time
     return creds_collection.find_one({"auth_token":auth_token_from_browser})
+
+#Function to update the like count on a post
+def get_msg_and_like(db, auth_token_from_browser, objectId):
+    #Re-establishing collections to reference the chat history and counter variable
+    chat_collection = db["chat"]
+    counter_collection = db["counter"]
+    #Document with data of the message
+    likes = chat_collection.find_one({"id":objectId})
+    #List of people who have liked the message
+    likers = likes["likers"]
+    #Auth token information, to get the username
+    get_auth_tokens_value = get_auth_tokens(db,auth_token_from_browser)
+    #Checking if the user has already liked this specific post
+    if(get_auth_tokens_value["username"] in likers):
+        #If so, creating a new list with the liked person removed
+        likers2 = list(likers).remove(get_auth_tokens_value["username"])
+        #Checking if the user was removed successfully
+        if(not likers2):
+            #Avoid NoneType error
+            chat_collection.find_one_and_update(likes,{"$set":{"likes":likes["likes"]-1,"likers":[]}})
+            #Returning the updated like count
+            return likes["likes"]-1
+        #Otherwise, updating the post information in DB to remove a like
+        else:
+            #Update the document with one less like and one less liker
+            chat_collection.find_one_and_update(likes,{"$set":{"likes":likes["likes"]-1,"likers":likers2}})
+            #Returning the updated like count
+            return likes["likes"]-1
+    #Otherwise, updating the post information in DB to add a like
+    else:
+        #Update the document with one more like and one more liker
+        chat_collection.find_one_and_update(likes,{"$set":{"likes":likes["likes"]+1,"likers":likers+[get_auth_tokens_value["username"]]}})
+        #Returning the updated like count
+        return likes["likes"]+1
