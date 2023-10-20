@@ -6,7 +6,7 @@ from html import *
 #Initialization function for both collections within the DB
 def db_init():
     #Creating variables to reference different layers of MongoDB
-    mongo_client = MongoClient("localhost")
+    mongo_client = MongoClient("mongo")
     # mongo_client = MongoClient("mongo")
     db = mongo_client["CSE312-Project"]
     #Creating collection to reference the chat history
