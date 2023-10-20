@@ -69,5 +69,10 @@ img.post {
 
 /* Creating a class to display blank vertical space */
 .vertical_space{
-    margin-bottom:  175px;
+    margin-bottom:  100px;
+}
+
+/* Creating a class to display the user's username */
+.display_username{
+    color: rgb(75, 255, 117);
 }

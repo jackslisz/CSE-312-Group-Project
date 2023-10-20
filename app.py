@@ -1,13 +1,14 @@
-#Importing Flask and json modules
+#Importing Flask, json, secrets, hashlib, and bcrypt modules
 from flask import *
 from json import *
+from secrets import *
+from hashlib import *
+from bcrypt import *
 #Importing HTML escape function
 from html import escape
 #Importing functions from dbhandler.py
 from util.dbhandler import *
-import secrets
-import hashlib
-import bcrypt
+
 #Creating Flask app instance and storing it in app
 #__name__ holds the name of current Python module
 app = Flask(__name__)
@@ -18,9 +19,20 @@ db = db_init()
 @app.route("/")
 @app.route("/home")
 def home_page():
-    #Calling render_template to look for and open the file index.html
-    #Calling make_response to make a flask response to edit headers and MIME types
-    response = make_response(render_template('index.html'))
+    #Retrieving the authentication token from browser
+    auth_token_from_browser = request.cookies.get('auth_token', None)
+    #Checking if the user has an auth token present
+    if auth_token_from_browser is not None:
+        #If so, hashing the token by calling the SHA256 function
+        encrypt_auth_token = sha256(auth_token_from_browser.encode()).digest()
+        #Checking whether the DB contains that auth token, if not setting db_result to hold an empty dictionary
+        db_result = get_auth_tokens(db, encrypt_auth_token) if get_auth_tokens(db, encrypt_auth_token) != None else {}
+        #If so, calling render_template to look for and open the file index.html
+        #Calling make_response to make a flask response to edit headers and MIME types
+        response = make_response(render_template('index_template.html', username=db_result.get("username", 'Guest')))
+    #Otherwise, replacing the template with the username "Guest"
+    else:
+        response = make_response(render_template('index_template.html', username='Guest'))
     #Setting the nosniff header
     response.headers['X-Content-Type-Options'] = 'nosniff'
     #Setting the correct MIME type for HTML
@@ -79,25 +91,28 @@ def visit_counter_cookie():
 #Decorator to turn Python function chat_message into Flask view function
 @app.route('/chat-message', methods=["POST"])
 def chat_message():
-    #Updating the unique ID of the new message
-    update_id(db)
     #Retrieving the entire body of the request by calling get_data()
     body = request.get_data().decode()
-    #Splitting the body at the colon to separate the message
-    body = body.split(":", 1)
-    #Retriving the authentication token
-    auth_token_from_browser=request.cookies.get('auth_token', None)
-
-    # SH256 encrypting the authentication token to check with the database
-    #Check for cookie
-    if(auth_token_from_browser):
-        encrypt = hashlib.sha256()
-        encrypt_auth_token = auth_token_from_browser
-        encrypt.update(encrypt_auth_token.encode())
-    #Checking whether the dabase contains that auth token 
-    if(get_auth_tokens(db,encrypt_auth_token)):
-        #Inserting the message into the DB using splicing
-        insert_message(db, body[1][1:-2],get_auth_tokens(db,encrypt_auth_token)["username"])
+    #Splitting the body at the comma to separate the title from the description
+    body = body.split(",", 1)
+    #Removing the key from the title value, leaving just the title the user entered
+    body[0] = body[0].replace("{\"title\":\"", "")
+    body[0] = body[0][0:-1]
+    #Removing the key from the description value, leaving just the description the user entered
+    body[1] = body[1].replace("\"description\":\"", "")
+    body[1] = body[1][0:-2]
+    #Retrieving the authentication token
+    auth_token_from_browser = request.cookies.get('auth_token', None)
+    #Checking if the user has an auth token present
+    if auth_token_from_browser is not None:
+        #Hashing the token by calling the SHA256 function
+        encrypt_auth_token = sha256(auth_token_from_browser.encode()).digest()
+        #Checking whether the DB contains that auth token 
+        if(get_auth_tokens(db, encrypt_auth_token)):
+            #If so, updating the unique ID of the new message
+            update_id(db)
+            #Inserting the message into the DB using splicing
+            insert_message(db, body, get_auth_tokens(db, encrypt_auth_token)["username"])
     #Calling make_response to make an empty flask response
     return make_response(f"")
 
@@ -110,9 +125,6 @@ def chat_history():
         chat_history = dumps(list(get_chat_history(db))).encode()
         #Calling make_response to make a response using the JSON object in chat_history
         return make_response(chat_history)
-    #Otherwise, calling make_response to make an empty flask response
-    else:
-        return make_response(f"")
     
 #Decorator to turn Python function register_user into Flask view function
 @app.route('/register', methods=["POST"])
@@ -133,41 +145,53 @@ def register_user():
     #Sending a redirect to the home page by calling redirect() and url_for()
     return redirect(url_for('home_page'))
 
+#Decorator to turn Python function login_page into Flask view function
 @app.route("/login", methods=["POST"])
 def login_page():
     #Retrieve the data 
-    json_log_data=request.get_data().decode().split("&")
+    json_log_data = request.get_data().decode().split("&")
     #Obtain the unencrypted password
     unencrypted_password = json_log_data[1].split("=")[1]
     #Obtain username
     username = json_log_data[0].split("=")[1]
-    #Run a function ot check whether the username andpassword match the databse
-    authentication_attempt = check_creds(db, [username,unencrypted_password])
+    #Run a function to check whether the username and password match in the DB
+    authentication_attempt = check_creds(db, [username, unencrypted_password])
     if(authentication_attempt):
-        #Create, Hash and store a random auth token
-        gen_auth_token = secrets.token_urlsafe(16)
-        encrypt = hashlib.sha256()
+        #If successful, create, Hash and store a random auth token
+        gen_auth_token = token_urlsafe(16)
+        #Calling gen_auth_token to generate a new auth token value for user
         encrypt_auth_token = gen_auth_token
-        encrypt.update(encrypt_auth_token.encode())
-        add_auth(db,authentication_attempt,encrypt_auth_token)
-        response=make_response("You are authenticated!!!!!!!!!",200)
+        #Hashing the token by calling the SHA256 function
+        encrypt_auth_token = sha256(encrypt_auth_token.encode()).digest()
+        #Calling add_auth to add the token to the DB
+        add_auth(db, authentication_attempt, encrypt_auth_token)
+        #Calling make_response to make and send a Flask response
+        response = redirect(url_for('home_page'))
         #Make cookie of auth_token
         response.set_cookie('auth_token', gen_auth_token, max_age=3600, httponly=True) 
-
+    #Otherwise, returning error message 401
     else:
-        #Return error message 405
-        response=make_response("You are not authenticated!!!!!!!!!",405)
-        response.headers["Content-Type"]="application/json"
-        # return response
+        response = abort(401)
+    #Returning the Flask response
     return response
 
 @app.route("/chat-like", methods=["POST"])
 def like_message():
-    print("kfkdk")
     body = request.get_data().decode()
     #Splitting the body at the colon to separate the message
     body = body
-    get_msg_and_like(db,body)
+    # print(body)
+    auth_token_from_browser=request.cookies.get('auth_token', None)
+    # SH256 encrypting the authentication token to check with the database. This is to ensure only logged-in users are able to like
+    #Check for cookie
+    if(auth_token_from_browser):
+        encrypt = sha256()
+        encrypt_auth_token = sha256(auth_token_from_browser.encode()).digest()
+        # encrypt.update(encrypt_auth_token.encode())
+        #Call function to like/unlike a message
+        get_msg_and_like(db,encrypt_auth_token,json.loads(body)["messageId"])
+    response=make_response("You are authenticated!!!!!!!!!",200)
+    return response
 
 #Checking if __name__ is the name of top-level environment of program
 if __name__ == "__main__":

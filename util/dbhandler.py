@@ -1,12 +1,13 @@
-#Importing MongoDB and bcrypt modules
+#Importing MongoDB, bcrypt, and HTML modules
 from pymongo import MongoClient
 from bcrypt import *
-import html
+from html import *
+
 #Initialization function for both collections within the DB
 def db_init():
     #Creating variables to reference different layers of MongoDB
-    # mongo_client = MongoClient("localhost")
-    mongo_client = MongoClient("mongo")
+    mongo_client = MongoClient("localhost")
+    # mongo_client = MongoClient("mongo")
     db = mongo_client["CSE312-Project"]
     #Creating collection to reference the chat history
     chat_collection = db["chat"]
@@ -36,12 +37,12 @@ def update_id(db):
     counter_collection.update_one({}, {"$set": {"count": counter_collection.find_one({},{}).get("count") + 1}})
 
 #Function to insert a message into DB
-def insert_message(db, message, username):
+def insert_message(db, body, username):
     #Re-establishing collections to account for chat history and unique IDs
     chat_collection = db["chat"]
     counter_collection = db["counter"]
     #Calling the insert_one function to insert the message into the DB
-    chat_collection.insert_one({"username": username, "message": html.escape(message), "id": int(counter_collection.find_one({},{}).get("count"))})
+    chat_collection.insert_one({"username": username, "title": escape(body[0]), "description": escape(body[1]), "id": int(counter_collection.find_one({},{}).get("count")),"likes":0, "likers":[]})
 
 #Function to store new credentials from a registration request in the DB
 def store_creds(db, creds):
@@ -53,38 +54,73 @@ def store_creds(db, creds):
     #Calling the insert_one function to insert creds into the DB
     creds_collection.insert_one({"username": creds[0], "password": creds[1], "auth_token": b"", "salt": salt})
 
+#Function to authenticate a user given their login request
 def check_creds(db, creds):
+    #Re-establishing the collection to reference the credentials
     creds_collection = db["credentials"]
     #Read the username and plain password sent by the user
     username = creds[0]
     plaintext_password = creds[1]
     #Obtain the database entry with that username in it. If none is found, returns None
-    usrnm_check = creds_collection.find_one({"username":username})
-    if(usrnm_check is not None):
-        #Obtain salt and salted encrypted password
-        stored_salt = usrnm_check["salt"]
-        stored_password =usrnm_check["password"]
-        #Hash and salt the user's attempted passwpord to check if they match
+    username_check = creds_collection.find_one({"username":username})
+    #Checking if user was found within DB
+    if(username_check is not None):
+        #If so, obtaining salt and salted encrypted password
+        stored_salt = username_check["salt"]
+        stored_password = username_check["password"]
+        #Hash and salt the user's attempted password to check if they match
         encrypt_given_password = hashpw(plaintext_password.encode(),stored_salt)
+        #If statement to verify the passwords
         if(encrypt_given_password == stored_password):
-            return usrnm_check
+            #If verified, returning username_check (true)
+            return username_check
+        #Otherwise, returning false to signal a failed verification
         else:
             return False
+    #Otherwise, returning false to signal a failed verification
     else:
         return False
-    
+
+#Function to store an auth token in the DB
 def add_auth(db,creds, auth_token_encrypted):
+    #Re-establishing the collection to reference the credentials
     creds_collection = db["credentials"]
-    # add an auth token every time the user logs in. Change the pre existing (or empty) token to the new one.
+    #Adding an auth token every time the user logs in. Change the pre existing (or empty) token to the new one.
     to_add = creds_collection.find_one_and_update(creds,{"$set":{"auth_token":auth_token_encrypted}})
 
+#Function to retrieve the auth token from browser
 def get_auth_tokens(db,auth_token_from_browser):
+    #Re-establishing the collection to reference the credentials
     creds_collection = db["credentials"]
-    #Check whether the browser's auth token matches that of the user. There can only be one auth token at a time
-    auth_token_check = creds_collection.find_one({"auth_token":auth_token_from_browser})
-    return auth_token_check
+    #Checking whether the browser's auth token matches that of the user. There can only be one auth token at a time
+    return creds_collection.find_one({"auth_token":auth_token_from_browser})
 
-
-    # creds_collection
-
-
+# def get_auth_tokens(db,auth_token_from_browser):
+#     creds_collection = db["credentials"]
+#     #Check whether the browser's auth token matches that of the user. There can only be one auth token at a time
+#     auth_token_check = creds_collection.find_one({"auth_token":auth_token_from_browser})
+#     return auth_token_check
+def get_msg_and_like(db,auth_token_from_browser,objectId):
+    chat_collection = db["chat"]
+    counter_collection = db["counter"]
+    #Document with data of the message
+    likes = chat_collection.find_one({"id":objectId})
+    #List of people who have liked the message
+    likers = likes["likers"]
+    #Auth token information, to get the username
+    get_auth_tokens_value = get_auth_tokens(db,auth_token_from_browser)
+    if(get_auth_tokens_value["username"] in likers):
+        #New list with the liked person removed
+        likers2=list(likers).remove(get_auth_tokens_value["username"])
+        print(likers2)
+        if(not likers2):
+            #Avoid NoneType error
+            chat_collection.find_one_and_update(likes,{"$set":{"likes":likes["likes"]-1,"likers":[]}})
+            return likes["likes"]-1
+        else:
+            #Update the document with one less like and one less liker
+            chat_collection.find_one_and_update(likes,{"$set":{"likes":likes["likes"]-1,"likers":likers2}})
+            return likes["likes"]-1
+    else:
+        chat_collection.find_one_and_update(likes,{"$set":{"likes":likes["likes"]+1,"likers":likers+[get_auth_tokens_value["username"]]}})
+        return likes["likes"]+1

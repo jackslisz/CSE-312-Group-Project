@@ -9,12 +9,30 @@ function deleteMessage(messageId) {
     request.send();
 }
 
+function likeMessage(messageId){
+    const request = new XMLHttpRequest();
+    request.onreadystatechange = function () {
+        if (this.readyState === 4 && this.status === 200) {
+            console.log(this.response);
+        }
+    }
+    console.log(messageId)
+    request.open("POST", "/chat-like");
+    request.send(JSON.stringify({"messageId":messageId}));
+    request.send();
+}
+
 function chatMessageHTML(messageJSON) {
     const username = messageJSON.username;
-    const message = messageJSON.message;
+    const title = messageJSON.title;
+    const likes = messageJSON.likes;
+    console.log(likes)
+    console.log(messageJSON)
+    const description = messageJSON.description;
     const messageId = messageJSON.id;
-    let messageHTML = "<br><button onclick='deleteMessage(" + messageId + ")'>X</button> ";
-    messageHTML += "<span id='message_" + messageId + "'><b>" + username + "</b>: " + message + "</span>";
+    let messageHTML = "<br><button onclick='deleteMessage(" + messageId + ")'>❌</button>&nbsp;&nbsp;&nbsp;";
+    messageHTML += "<span id='message_" + messageId + "'>&nbsp;&nbsp;&nbsp;" + username + ": <h2>" + title + "</h2>" + description + "</span>";
+    messageHTML += "<button onclick='likeMessage(" + messageId + ")'>💓("+likes+")</button>";
     return messageHTML;
 }
 
@@ -31,19 +49,22 @@ function addMessageToChat(messageJSON) {
 }
 
 function sendChat() {
-    const chatTextBox = document.getElementById("chat-text-box");
-    const message = chatTextBox.value;
-    chatTextBox.value = "";
+    const title_text_box = document.getElementById("title-text-box");
+    const title = title_text_box.value;
+    title_text_box.value = "";
+    const description_text_box = document.getElementById("description-text-box");
+    const description = description_text_box.value;
+    description_text_box.value = "";
     const request = new XMLHttpRequest();
     request.onreadystatechange = function () {
         if (this.readyState === 4 && this.status === 200) {
             console.log(this.response);
         }
     }
-    const messageJSON = {"message": message};
+    const messageJSON = {"title": title, "description": description};
     request.open("POST", "/chat-message");
     request.send(JSON.stringify(messageJSON));
-    chatTextBox.focus();
+    title_text_box.focus();
 }
 
 function updateChat() {
@@ -69,7 +90,7 @@ function welcome() {
     });
 
     document.getElementById("paragraph").innerHTML = "<br/>Welcome to the best chat system ever!!! Here you can chat and share images with other users 🤠";
-    document.getElementById("chat-text-box").focus();
+    document.getElementById("chat-messages").focus();
 
     updateChat();
     setInterval(updateChat, 2000);
