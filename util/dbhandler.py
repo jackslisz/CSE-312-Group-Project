@@ -7,8 +7,8 @@ from html import *
 def db_init():
     #Creating variables to reference different layers of MongoDB
     mongo_client = MongoClient("mongo")
-    # mongo_client = MongoClient("mongo")
-    db = mongo_client["CSE312-Project"]
+    # mongo_client = MongoClient("localhost")
+    db = mongo_client["CSE312-Project-One"]
     #Creating collection to reference the chat history
     chat_collection = db["chat"]
     #Creating collection to reference usernames and passwords
@@ -107,24 +107,34 @@ def get_msg_and_like(db, auth_token_from_browser, objectId):
     #Auth token information, to get the username
     get_auth_tokens_value = get_auth_tokens(db,auth_token_from_browser)
     #Checking if the user has already liked this specific post
+    print(likers)
     if(get_auth_tokens_value["username"] in likers):
         #If so, creating a new list with the liked person removed
-        likers2 = list(likers).remove(get_auth_tokens_value["username"])
+        likers2 = list(likers)
+        likers2.remove(get_auth_tokens_value["username"])
+        print("i deletwed ad got", likers2)
         #Checking if the user was removed successfully
+        print(get_auth_tokens_value["username"], "is unliking")
+        # print(li)
         if(not likers2):
             #Avoid NoneType error
             chat_collection.find_one_and_update(likes,{"$set":{"likes":likes["likes"]-1,"likers":[]}})
+            print("[[]]")
             #Returning the updated like count
-            return likes["likes"]-1
+            
+            # return likes["likes"]-1
         #Otherwise, updating the post information in DB to remove a like
         else:
             #Update the document with one less like and one less liker
             chat_collection.find_one_and_update(likes,{"$set":{"likes":likes["likes"]-1,"likers":likers2}})
             #Returning the updated like count
-            return likes["likes"]-1
+            # return likes["likes"]-1
+            print(likers2)
     #Otherwise, updating the post information in DB to add a like
     else:
         #Update the document with one more like and one more liker
+        print(get_auth_tokens_value["username"],"is currently LIKE NEW")
         chat_collection.find_one_and_update(likes,{"$set":{"likes":likes["likes"]+1,"likers":likers+[get_auth_tokens_value["username"]]}})
         #Returning the updated like count
-        return likes["likes"]+1
+        # return likes["likes"]+1
+    # print("after everything",likers)
