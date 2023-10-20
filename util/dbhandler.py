@@ -6,8 +6,8 @@ from html import *
 #Initialization function for both collections within the DB
 def db_init():
     #Creating variables to reference different layers of MongoDB
-    # mongo_client = MongoClient("localhost")
-    mongo_client = MongoClient("mongo")
+    mongo_client = MongoClient("localhost")
+    # mongo_client = MongoClient("mongo")
     db = mongo_client["CSE312-Project"]
     #Creating collection to reference the chat history
     chat_collection = db["chat"]
@@ -95,9 +95,18 @@ def get_auth_tokens(db,auth_token_from_browser):
     #Checking whether the browser's auth token matches that of the user. There can only be one auth token at a time
     return creds_collection.find_one({"auth_token":auth_token_from_browser})
 
+<<<<<<< HEAD
 #Function to update the like count on a post
 def get_msg_and_like(db, auth_token_from_browser, objectId):
     #Re-establishing collections to reference the chat history and counter variable
+=======
+# def get_auth_tokens(db,auth_token_from_browser):
+#     creds_collection = db["credentials"]
+#     #Check whether the browser's auth token matches that of the user. There can only be one auth token at a time
+#     auth_token_check = creds_collection.find_one({"auth_token":auth_token_from_browser})
+#     return auth_token_check
+def get_msg_and_like(db,auth_token_from_browser,objectId):
+>>>>>>> fe4c7302fb598675024c6941611ecc60174ec965
     chat_collection = db["chat"]
     counter_collection = db["counter"]
     #Document with data of the message
@@ -106,6 +115,7 @@ def get_msg_and_like(db, auth_token_from_browser, objectId):
     likers = likes["likers"]
     #Auth token information, to get the username
     get_auth_tokens_value = get_auth_tokens(db,auth_token_from_browser)
+<<<<<<< HEAD
     #Checking if the user has already liked this specific post
     if(get_auth_tokens_value["username"] in likers):
         #If so, creating a new list with the liked person removed
@@ -128,3 +138,20 @@ def get_msg_and_like(db, auth_token_from_browser, objectId):
         chat_collection.find_one_and_update(likes,{"$set":{"likes":likes["likes"]+1,"likers":likers+[get_auth_tokens_value["username"]]}})
         #Returning the updated like count
         return likes["likes"]+1
+=======
+    if(get_auth_tokens_value["username"] in likers):
+        #New list with the liked person removed
+        likers2=list(likers).remove(get_auth_tokens_value["username"])
+        print(likers2)
+        if(not likers2):
+            #Avoid NoneType error
+            chat_collection.find_one_and_update(likes,{"$set":{"likes":likes["likes"]-1,"likers":[]}})
+            return likes["likes"]-1
+        else:
+            #Update the document with one less like and one less liker
+            chat_collection.find_one_and_update(likes,{"$set":{"likes":likes["likes"]-1,"likers":likers2}})
+            return likes["likes"]-1
+    else:
+        chat_collection.find_one_and_update(likes,{"$set":{"likes":likes["likes"]+1,"likers":likers+[get_auth_tokens_value["username"]]}})
+        return likes["likes"]+1
+>>>>>>> fe4c7302fb598675024c6941611ecc60174ec965
