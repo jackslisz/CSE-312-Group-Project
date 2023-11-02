@@ -32,17 +32,32 @@
         <div id="chat-messages">
         </div>
         <div class="chat-form">
-            <hr>
-            <label>
-                Title:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                <input id="title-text-box" type="text">
+
+            Register:
+            <form action="/register" method="post" enctype="application/x-www-form-urlencoded">
+                <label>Username:
+                    <input id="reg-form-username" type="text" name="username_reg"/>
+                </label>
+                <br/>
+                <label>Password:&nbsp;
+                    <input id="reg-form-pass" type="password" name="password_reg">
+                </label>
+                <input type="submit" value="Submit">
+            </form>
+    
+            <p class="horizontal_space"></p>
+
+            Login:
+        <form action="/login" method="post" enctype="application/x-www-form-urlencoded">
+            <label>Username:
+                <input id="login-form-username" type="text" name="username_login"/>
             </label>
-            <p></p>
-            <label>
-                Description:
-                <input id="description-text-box" type="text">
+            <br/>
+            <label>Password:&nbsp;
+                <input id="login-form-pass" type="password" name="password_login">
             </label>
-            <button id="chat-button" onclick="sendChat()">Post</button>
+            <input type="submit" value="Submit">
+        </form>
         </div>
     </div>
 
@@ -55,34 +70,32 @@
         <p class="vertical_space"></p>
         <p class="vertical_space"></p>
         <!-- Registration form -->
-        Register:
-        <form action="/register" method="post" enctype="application/x-www-form-urlencoded">
-            <label>Username:
-                <input id="reg-form-username" type="text" name="username_reg"/>
-            </label>
-            <br/>
-            <label>Password:&nbsp;
-                <input id="reg-form-pass" type="password" name="password_reg">
-            </label>
-            <input type="submit" value="Submit">
-        </form>
-
+        
         <!-- Displaying vertical space -->
         <p class="vertical_space"></p>
         <p class="vertical_space"></p>
         <p class="vertical_space"></p>
         <!-- Login form -->
-        Login:
-        <form action="/login" method="post" enctype="application/x-www-form-urlencoded">
-            <label>Username:
-                <input id="login-form-username" type="text" name="username_login"/>
-            </label>
+
+        <label>
+            Title:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <input id="title-text-box" type="text">
+        </label>
+        <p></p>
+        <label>
+            Description:
+            <input id="description-text-box" type="text">
+        </label>
+
+        <form action="" id="image-form" method="post" enctype="multipart/form-data">
             <br/>
-            <label>Password:&nbsp;
-                <input id="login-form-pass" type="password" name="password_login">
-            </label>
-            <input type="submit" value="Submit">
+            <label for="form-file">Change profile picture: </label>
+            <input id="form-file" type="file" name="upload">
+            <br/>
+            <p class="horizontal_space"></p>
+            <input type="submit" value="Post">
         </form>
+        
     </div>
 </div>
 
