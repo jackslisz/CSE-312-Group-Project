@@ -31,8 +31,8 @@
 <div class="contents">
     <div class="chat">
         <div id="chat-messages"></div>
-        <div class="user-list">
-            <div>
+        <div class="user-list" style="display: flex; gap: 20px;">
+            <div style="flex: 1;">
                 Register:
                 <form action="/register" method="post" enctype="application/x-www-form-urlencoded">
                     <label>Username:
@@ -42,22 +42,24 @@
                     <label>Password:&nbsp;
                         <input id="reg-form-pass" type="password" name="password_reg">
                     </label>
+                    <br>
                     <input type="submit" value="Submit">
                 </form>
             </div>
             <div>
-            Login:
-            <form action="/login" method="post" enctype="application/x-www-form-urlencoded">
-                <label>Username:
-                    <input id="login-form-username" type="text" name="username_login"/>
-                </label>
-                <br/>
-                <label>Password:&nbsp;
-                    <input id="login-form-pass" type="password" name="password_login">
-                </label>
-                <input type="submit" value="Submit">
-            </form>
-        </div>
+                Login:
+                <form action="/login" method="post" enctype="application/x-www-form-urlencoded">
+                    <label>Username:
+                        <input id="login-form-username" type="text" name="username_login"/>
+                    </label>
+                    <br/>
+                    <label>Password:&nbsp;
+                        <input id="login-form-pass" type="password" name="password_login">
+                    </label>
+                    <br>
+                    <input type="submit" value="Submit">
+                </form>
+            </div>
         </div>
     </div>
 
@@ -75,7 +77,7 @@
             <input id="description-text-box" type="text">
         </label>
         <hr>
-        
+        <!---->
         <label>
             Choice 1:
             <input id="choice-1" type="radio" name="choices">
@@ -108,9 +110,19 @@
             <input id="choice-4-text" type="text" placeholder="Choice 4">
         </label>
 
+        <label>
+            Correct Option:
+        <label>
+        <select name="right-option" id="right-option">
+            <option value="choice-1">Choice 1</option>
+            <option value="choice-2">Choice 2</option>
+            <option value="choice-3">Choice 3</option>
+            <option value="choice-4">Choice 4</option>
+          </select>
+
         <form id="image-form" method="post" enctype="multipart/form-data">
             <br/>
-            <label for="form-file">(Optional) Upload an image for your question </label>
+            <label for="form-file">(Optional) Upload an image for your question: </label>
             <input id="form-file" type="file" name="upload">
             <br/>
             <p class="horizontal_space"></p>
