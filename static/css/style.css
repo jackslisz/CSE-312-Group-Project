@@ -57,9 +57,9 @@ img.post {
 
 /* Changing all occurrences of class user-list to have properties below */
 .user-list{
-    width: 30%;
+    width: 100%;
     background-color: #313131;
-    margin-left:  125px;
+    /* margin-left:  125px; */
 }
 
 /* Changing all occurrences of class header to have properties below */

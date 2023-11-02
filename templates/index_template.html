@@ -24,61 +24,49 @@
             This will be replaced by JavaScript
         </p>
     </div>
+    <p class="display_username">You are currently logged in as: {{username}}</p>
 </div>
 
 <!-- Chat section -->
 <div class="contents">
     <div class="chat">
-        <div id="chat-messages">
-        </div>
-        <div class="chat-form">
-
-            Register:
-            <form action="/register" method="post" enctype="application/x-www-form-urlencoded">
+        <div id="chat-messages"></div>
+        <div class="user-list">
+            <div>
+                Register:
+                <form action="/register" method="post" enctype="application/x-www-form-urlencoded">
+                    <label>Username:
+                        <input id="reg-form-username" type="text" name="username_reg"/>
+                    </label>
+                    <br/>
+                    <label>Password:&nbsp;
+                        <input id="reg-form-pass" type="password" name="password_reg">
+                    </label>
+                    <input type="submit" value="Submit">
+                </form>
+            </div>
+            <div>
+            Login:
+            <form action="/login" method="post" enctype="application/x-www-form-urlencoded">
                 <label>Username:
-                    <input id="reg-form-username" type="text" name="username_reg"/>
+                    <input id="login-form-username" type="text" name="username_login"/>
                 </label>
                 <br/>
                 <label>Password:&nbsp;
-                    <input id="reg-form-pass" type="password" name="password_reg">
+                    <input id="login-form-pass" type="password" name="password_login">
                 </label>
                 <input type="submit" value="Submit">
             </form>
-    
-            <p class="horizontal_space"></p>
-
-            Login:
-        <form action="/login" method="post" enctype="application/x-www-form-urlencoded">
-            <label>Username:
-                <input id="login-form-username" type="text" name="username_login"/>
-            </label>
-            <br/>
-            <label>Password:&nbsp;
-                <input id="login-form-pass" type="password" name="password_login">
-            </label>
-            <input type="submit" value="Submit">
-        </form>
+        </div>
         </div>
     </div>
 
-    <div class="user-list">
-        <!-- Displaying vertical space -->
-        <p class="vertical_space"></p>
-        <!-- Displaying username -->
-        <p class="display_username">You are currently logged in as: {{username}}</p>
-        <!-- Displaying vertical space -->
-        <p class="vertical_space"></p>
-        <p class="vertical_space"></p>
-        <!-- Registration form -->
+    <div class="chat-form">
+        <h2>Post a new question:</h2>
+        <br>
         
-        <!-- Displaying vertical space -->
-        <p class="vertical_space"></p>
-        <p class="vertical_space"></p>
-        <p class="vertical_space"></p>
-        <!-- Login form -->
-
         <label>
-            Title:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            Title:
             <input id="title-text-box" type="text">
         </label>
         <p></p>
@@ -86,16 +74,49 @@
             Description:
             <input id="description-text-box" type="text">
         </label>
+        <hr>
+        
+        <label>
+            Choice 1:
+            <input id="choice-1" type="radio" name="choices">
+        </label>
+        <label>
+            <input id="choice-1-text" type="text" placeholder="Choice 1">
+        </label>
+        <br>
+        <label>
+            Choice 2:
+            <input id="choice-2" type="radio" name="choices">
+        </label>
+        <label>
+            <input id="choice-2-text" type="text" placeholder="Choice 2">
+        </label>
+        <br>
+        <label>
+            Choice 3:
+            <input id="choice-3" type="radio" name="choices">
+        </label>
+        <label>
+            <input id="choice-3-text" type="text" placeholder="Choice 3">
+        </label>
+        <br>
+        <label>
+            Choice 4:
+            <input id="choice-4" type="radio" name="choices">
+        </label>
+        <label>
+            <input id="choice-4-text" type="text" placeholder="Choice 4">
+        </label>
 
-        <form action="" id="image-form" method="post" enctype="multipart/form-data">
+        <form id="image-form" method="post" enctype="multipart/form-data">
             <br/>
-            <label for="form-file">Change profile picture: </label>
+            <label for="form-file">(Optional) Upload an image for your question </label>
             <input id="form-file" type="file" name="upload">
             <br/>
             <p class="horizontal_space"></p>
-            <input type="submit" value="Post">
         </form>
-        
+        <button id="chat-button" onclick="sendChat()">Post</button>
+
     </div>
 </div>
 
