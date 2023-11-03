@@ -1,4 +1,5 @@
 #Ignoring any virtual enviroments (Jack, Ria)
+venvforgroupproject/
 .env
 env/pyvenv.cfg
 env/bin/activate
@@ -4625,3 +4626,4 @@ venvforgroupproject/lib/python3.11/site-packages/werkzeug-3.0.1.dist-info/RECORD
 venvforgroupproject/lib/python3.11/site-packages/werkzeug-3.0.1.dist-info/WHEEL
 static/.DS_Store
 .DS_Store
+util/__pycache__/dbhandler.cpython-311.pyc

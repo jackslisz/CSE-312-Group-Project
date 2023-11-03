@@ -28,13 +28,54 @@ function chatMessageHTML(messageJSON) {
     const likes = messageJSON.likes;
     const description = messageJSON.description;
     const messageId = messageJSON.id;
+    const choice1 = messageJSON.choice1;
+    const choice2 = messageJSON.choice2;
+    const choice3 = messageJSON.choice3;
+    const choice4 = messageJSON.choice4;
+
     let messageHTML =  
     `<div class=new_chat_message>
-	<button onclick='deleteMessage(${messageId})'>❌</button>&nbsp;
-	<span id='message_${messageId}'>${username}: <font size="+2"><b>${title}</b></font></span>
+	<i class="bi bi-person-fill"></i>
+    <span id='message_${messageId}'>${username}<br></span>
+    <font size="+2"><b>${title}</b></font>
+    <br>
+    <a><b>${description}<b></a>
+    <hr style="border: 1px dotted #ffffff;">
     </div>
     <div>
-    <p>${description}</p>
+    <label>
+        Choice 1:
+        <input id="choice-1" type="radio" name="choices">
+    </label>
+    <label>
+        ${choice1}
+    </label>
+    <br>
+    <label>
+        Choice 2:
+        <input id="choice-2" type="radio" name="choices">
+    </label>
+    <label>
+        ${choice2}
+    </label>
+    <br>
+    <label>
+        Choice 3:
+        <input id="choice-3" type="radio" name="choices">
+    </label>
+    <label>
+        ${choice3}
+    </label>
+    <br>
+    <label>
+        Choice 4:
+        <input id="choice-4" type="radio" name="choices">
+    </label>
+    <label>
+        ${choice4}
+    </label>
+    <br>
+    <button onclick='deleteMessage(${messageId})'>❌</button>&nbsp;
 	<button onclick='likeMessage(${messageId})'>💓&nbsp;(${likes})</button><br></br>
     </div>`
     return messageHTML;
@@ -59,13 +100,25 @@ function sendChat() {
     const description_text_box = document.getElementById("description-text-box");
     const description = description_text_box.value;
     description_text_box.value = "";
+    const choice1_text_box = document.getElementById("choice-1-text");
+    const choice1 = choice1_text_box.value;
+    choice1_text_box.value = "";
+    const choice2_text_box = document.getElementById("choice-2-text");
+    const choice2 = choice2_text_box.value;
+    choice2_text_box.value = "";
+    const choice3_text_box = document.getElementById("choice-3-text");
+    const choice3 = choice3_text_box.value;
+    choice3_text_box.value = "";
+    const choice4_text_box = document.getElementById("choice-4-text");
+    const choice4 = choice4_text_box.value;
+    choice4_text_box.value = "";
     const request = new XMLHttpRequest();
     request.onreadystatechange = function () {
         if (this.readyState === 4 && this.status === 200) {
             console.log(this.response);
         }
     }
-    const messageJSON = {"title": title, "description": description};
+    const messageJSON = {"title": title, "description": description, "choice1": choice1, "choice2": choice2, "choice3": choice3, "choice4": choice4};
     request.open("POST", "/chat-message");
     request.send(JSON.stringify(messageJSON));
     title_text_box.focus();

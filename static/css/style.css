@@ -37,6 +37,10 @@ img.post {
     height: 78%
 }
 
+.the-line{
+    width: 100%;
+}
+
 /* Changing all occurrences of class chat to have properties below */
 .chat{
     width: 70%;
