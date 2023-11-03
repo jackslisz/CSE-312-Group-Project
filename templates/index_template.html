@@ -22,10 +22,8 @@
         <img src="static/img/clip_art.png" alt="image" class="my_image"/></div>
     <div>
         <p id="paragraph">
-            This will be replaced by JavaScript
         </p>
     </div>
-    <p class="display_username">You are currently logged in as: {{username}}</p>
 </div>
 
 <!-- Chat section -->
@@ -33,6 +31,7 @@
     <div class="chat">
         <div id="chat-messages"></div>
         <div class="the-line"><hr></div>
+        <h4><span><i class="bi bi-person-fill"></i>Logged in as: {{username}}</span></h4>
         <div class="user-list" style="display: block">
             <div style="flex: 1;">
                 Register:
@@ -128,6 +127,9 @@
         <button id="chat-button" onclick="sendChat()">Post</button>
 
     </div>
+</div>
+
+<div>
 </div>
 
 <!-- Linking JS file -->
