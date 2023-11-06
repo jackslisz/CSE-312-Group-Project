@@ -43,7 +43,7 @@ def insert_message(db, body, username):
     counter_collection = db["counter"]
     #Calling the insert_one function to insert the message into the DB
     # print(body)
-    chat_collection.insert_one({"username": username, "title": escape(body[0]), "description": escape(body[1]), "choice1": escape(body[2]), "choice2": escape(body[3]), "choice3": escape(body[4]), "choice4": escape(body[5].replace("}", "")), "id": int(counter_collection.find_one({},{}).get("count")),"likes":0, "likers":[]})
+    chat_collection.insert_one({"username": username, "title": escape(body[0]), "description": escape(body[1]), "choice1": escape(body[2]), "choice2": escape(body[3]), "choice3": escape(body[4]), "choice4": escape(body[5].replace("}", "")), "correctanswer": escape(body[6]), "id": int(counter_collection.find_one({},{}).get("count")),"likes":0, "likers":[]})
 
 #Function to store new credentials from a registration request in the DB
 def store_creds(db, creds):

@@ -43,37 +43,41 @@ function chatMessageHTML(messageJSON) {
     <hr style="border: 1px dotted #ffffff;">
     </div>
     <div>
+    <form onsubmit="submitAnswer()" method="post">
     <label>
-        Choice 1:
-        <input id="choice-1" type="radio" name="choices">
+        1:
+        <input id="Choice 1" type="radio" name="choices">
     </label>
     <label>
         ${choice1}
     </label>
     <br>
     <label>
-        Choice 2:
-        <input id="choice-2" type="radio" name="choices">
+        2:
+        <input id="Choice 2" type="radio" name="choices">
     </label>
     <label>
         ${choice2}
     </label>
     <br>
     <label>
-        Choice 3:
-        <input id="choice-3" type="radio" name="choices">
+        3:
+        <input id="Choice 3" type="radio" name="choices">
     </label>
     <label>
         ${choice3}
     </label>
     <br>
     <label>
-        Choice 4:
-        <input id="choice-4" type="radio" name="choices">
+        4:
+        <input id="Choice 4" type="radio" name="choices">
     </label>
     <label>
         ${choice4}
     </label>
+    <br>
+    <input type="submit" value="Submit">
+    </form>
     <br>
     <button onclick='deleteMessage(${messageId})'>❌</button>&nbsp;
 	<button onclick='likeMessage(${messageId})'>💓&nbsp;(${likes})</button><br></br>
@@ -92,6 +96,29 @@ function addMessageToChat(messageJSON) {
     chatMessages.scrollIntoView(false);
     chatMessages.scrollTop = chatMessages.scrollHeight - chatMessages.clientHeight;
 }
+
+function submitAnswer() {
+    const request = new XMLHttpRequest();
+    request.onreadystatechange = function () {
+        if (this.readyState === 4 && this.status === 200) {
+            console.log(this.response);
+        }
+    }
+    var options = document.getElementsByName('choice');
+    var selected;
+    for(var i = 0; i < options.length; i++){
+        if(options[i].checked){
+            selected = options[i].value;
+        }
+    }
+    const correct_answer = document.getElementById("right-option");
+    const correct_answer_value = correct_answer.options[correct_answer.selectedIndex].text;
+    const messageJSON = {"selected": selected, "correctornot": selected == correct_answer_value};
+    request.open("POST", "/chat-message");
+    request.send(JSON.stringify(messageJSON));
+    title_text_box.focus(); 
+}
+
 
 function sendChat() {
     const title_text_box = document.getElementById("title-text-box");
@@ -112,13 +139,16 @@ function sendChat() {
     const choice4_text_box = document.getElementById("choice-4-text");
     const choice4 = choice4_text_box.value;
     choice4_text_box.value = "";
+    const correct_answer = document.getElementById("right-option");
+    const correct_answer_value = correct_answer.options[correct_answer.selectedIndex].text;
+    correct_answer.value = "choice-1";
     const request = new XMLHttpRequest();
     request.onreadystatechange = function () {
         if (this.readyState === 4 && this.status === 200) {
             console.log(this.response);
         }
     }
-    const messageJSON = {"title": title, "description": description, "choice1": choice1, "choice2": choice2, "choice3": choice3, "choice4": choice4};
+    const messageJSON = {"title": title, "description": description, "choice1": choice1, "choice2": choice2, "choice3": choice3, "choice4": choice4, "correctanswer": correct_answer_value};
     request.open("POST", "/chat-message");
     request.send(JSON.stringify(messageJSON));
     title_text_box.focus();
