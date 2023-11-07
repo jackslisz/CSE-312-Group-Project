@@ -8,6 +8,8 @@ from bcrypt import *
 from html import escape
 #Importing functions from dbhandler.py
 from util.dbhandler import *
+# from uswgi import *
+from flask_sock import Sock
 
 #Creating Flask app instance and storing it in app
 #__name__ holds the name of current Python module
@@ -16,6 +18,20 @@ app = Flask(__name__)
 db = db_init()
 
 #Decorators to turn Python function home_page into Flask view function
+
+sock = Sock(app)
+
+
+
+
+# @app.route("/websocket")
+# def application(env, start_response):
+#     # complete the handshake
+#     uwsgi.websocket_handshake(env['HTTP_SEC_WEBSOCKET_KEY'], env.get('HTTP_ORIGIN', ''))
+#     while True:
+#         msg = uwsgi.websocket_recv()
+#         uwsgi.websocket_send(msg)
+
 @app.route("/")
 @app.route("/home")
 def home_page():
@@ -40,6 +56,15 @@ def home_page():
     #Returning the finished response
     return response
 
+
+
+@sock.route('/websocket')
+def echo(ws):
+    while True:
+        data = ws.receive()
+        print(data)
+        ws.send(data)
+
 #Decorator to turn Python function style_page into Flask view function
 @app.route('/static/css/<path:file_path>')
 def style_page(file_path):
@@ -47,7 +72,8 @@ def style_page(file_path):
     response = send_from_directory('static/css/', file_path)
     #Setting the nosniff header
     response.headers['X-Content-Type-Options'] = 'nosniff' 
-    #Setting the correct MIME type for CSS
+    #Setting the correct MIME type for C
+    # SS
     response.headers['Content-Type'] = 'text/css; charset=utf-8'    
     #Returning the finished response
     return response
@@ -120,15 +146,16 @@ def chat_message():
     #Calling make_response to make an empty flask response
     return make_response(f"")
 
-#Decorator to turn Python function chat_history into Flask view function
-@app.route('/chat-history')
-def chat_history():
-    #Checking if the chat's history is not empty
-    if get_chat_history(db):
-        #Dumping the entire chat history into a JSON string
-        chat_history = dumps(list(get_chat_history(db))).encode()
-        #Calling make_response to make a response using the JSON object in chat_history
-        return make_response(chat_history)
+##Decorator to turn Python function chat_history into Flask view function
+##Commented to test functionality of websocket. If this is commented and new chat messages appear, websocket is the only functionality that enables this.
+# @app.route('/chat-history')
+# def chat_history():
+#     #Checking if the chat's history is not empty
+#     if get_chat_history(db):
+#         #Dumping the entire chat history into a JSON string
+#         chat_history = dumps(list(get_chat_history(db))).encode()
+#         #Calling make_response to make a response using the JSON object in chat_history
+#         return make_response(chat_history)
     
 #Decorator to turn Python function register_user into Flask view function
 @app.route('/register', methods=["POST"])
