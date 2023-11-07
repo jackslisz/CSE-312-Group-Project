@@ -146,7 +146,6 @@ function submitAnswer() {
         request.open("POST", "/submit-answer");
         request.send(JSON.stringify(messageJSON));
     }
-    title_text_box.focus(); 
 }
 
 
