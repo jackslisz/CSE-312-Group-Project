@@ -119,14 +119,20 @@ def visit_counter_cookie():
 def chat_message():
     #Retrieving the entire body of the request by calling get_data()
     body = request.get_data().decode()
+    print(f"body: {body}")
     #Splitting the body at the comma to separate the title from the description
-    body = body.split(",", 1)
+    body = body.split(",", -1)
+    for element in range(len(body)):
+        body[element] = body[element].split(":")[1].replace("\"","")
+        body[element] = body[element].replace("{","")
+        body[element] = body[element].replace("}","")
+    # print(body)
     #Removing the key from the title value, leaving just the title the user entered
-    body[0] = body[0].replace("{\"title\":\"", "")
-    body[0] = body[0][0:-1]
+    # body[0] = body[0].replace("{\"title\":\"", "")
+    # body[0] = body[0][0:-1]
     #Removing the key from the description value, leaving just the description the user entered
-    body[1] = body[1].replace("\"description\":\"", "")
-    body[1] = body[1][0:-2]
+    # body[1] = body[1].replace("\"description\":\"", "")
+    # body[1] = body[1][0:-2]
     #Retrieving the authentication token
     auth_token_from_browser = request.cookies.get('auth_token', None)
     #Checking if the user has an auth token present

@@ -5,6 +5,7 @@
     <title>CSE312 Group Project</title>
     <link rel="icon" type="image/x-icon" href="static/img/favicon.ico"/>
     <link rel="stylesheet" type="text/css" href="static/css/style.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 </head>
 
 <!-- Calling welcome function from JS file -->
@@ -21,7 +22,6 @@
         <img src="static/img/clip_art.png" alt="image" class="my_image"/></div>
     <div>
         <p id="paragraph">
-            This will be replaced by JavaScript
         </p>
     </div>
 </div>
@@ -29,61 +29,99 @@
 <!-- Chat section -->
 <div class="contents">
     <div class="chat">
-        <div id="chat-messages">
-        </div>
-        <div class="chat-form">
+        <div id="chat-messages"></div>
+        <div class="the-line"><hr></div>
+        <h4><span><i class="bi bi-person-fill"></i>Logged in as: {{username}}</span></h4>
+        <div class="user-list" style="display: block">
+            <div style="flex: 1;">
+                Register:
+                <form action="/register" method="post" enctype="application/x-www-form-urlencoded">
+                    <label>Username:
+                        <input id="reg-form-username" type="text" name="username_reg"/>
+                    </label>
+                    <br/>
+                    <label>Password:&nbsp;
+                        <input id="reg-form-pass" type="password" name="password_reg">
+                    </label>
+                    <br>
+                    <input type="submit" value="Submit">
+                </form>
+            </div>
+            <div>
+                Login:
+                <form action="/login" method="post" enctype="application/x-www-form-urlencoded">
+                    <label>Username:
+                        <input id="login-form-username" type="text" name="username_login"/>
+                    </label>
+                    <br/>
+                    <label>Password:&nbsp;
+                        <input id="login-form-pass" type="password" name="password_login">
+                    </label>
+                    <br>
+                    <input type="submit" value="Submit">
+                </form>
+            </div>
             <hr>
-            <label>
-                Title:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                <input id="title-text-box" type="text">
-            </label>
-            <p></p>
-            <label>
-                Description:
-                <input id="description-text-box" type="text">
-            </label>
-            <button id="chat-button" onclick="sendChat()">Post</button>
         </div>
     </div>
 
-    <div class="user-list">
-        <!-- Displaying vertical space -->
-        <p class="vertical_space"></p>
-        <!-- Displaying username -->
-        <p class="display_username">You are currently logged in as: {{username}}</p>
-        <!-- Displaying vertical space -->
-        <p class="vertical_space"></p>
-        <p class="vertical_space"></p>
-        <!-- Registration form -->
-        Register:
-        <form action="/register" method="post" enctype="application/x-www-form-urlencoded">
-            <label>Username:
-                <input id="reg-form-username" type="text" name="username_reg"/>
-            </label>
+    <div class="chat-form" style="padding: 10px">
+        <h2>Post a new question:</h2>
+        <br>
+        
+        <label>
+            Title:
+            <input id="title-text-box" type="text">
+        </label>
+        <p></p>
+        <label>
+            Description:
+            <input id="description-text-box" type="text">
+        </label>
+        <hr>
+        <!---->
+        <label>
+            Choice 1:
+            <input id="choice-1-text" type="text" placeholder="Choice 1">
+        </label>
+        <br>
+        <label>
+            Choice 2:
+            <input id="choice-2-text" type="text" placeholder="Choice 2">
+        </label>
+        <br>
+        <label>
+            Choice 3:
+            <input id="choice-3-text" type="text" placeholder="Choice 3">
+        </label>
+        <br>
+        <label>
+            Choice 4:
+            <input id="choice-4-text" type="text" placeholder="Choice 4">
+        </label>
+        <br>
+        <label>
+            Correct Option:
+        <label>
+        <select name="right-option" id="right-option">
+            <option value="choice-1">Choice 1</option>
+            <option value="choice-2">Choice 2</option>
+            <option value="choice-3">Choice 3</option>
+            <option value="choice-4">Choice 4</option>
+          </select>
+        <hr>
+        <form id="image-form" method="post" enctype="multipart/form-data">
+            <label for="formfile">(Optional) Upload an image for your question: </label>
+            <input id="formfile" type="file" name="upload">
             <br/>
-            <label>Password:&nbsp;
-                <input id="reg-form-pass" type="password" name="password_reg">
-            </label>
-            <input type="submit" value="Submit">
+            <p class="horizontal_space"></p>
         </form>
+        <button id="chat-button" onclick="sendChat()">Post</button>
 
-        <!-- Displaying vertical space -->
-        <p class="vertical_space"></p>
-        <p class="vertical_space"></p>
-        <p class="vertical_space"></p>
-        <!-- Login form -->
-        Login:
-        <form action="/login" method="post" enctype="application/x-www-form-urlencoded">
-            <label>Username:
-                <input id="login-form-username" type="text" name="username_login"/>
-            </label>
-            <br/>
-            <label>Password:&nbsp;
-                <input id="login-form-pass" type="password" name="password_login">
-            </label>
-            <input type="submit" value="Submit">
-        </form>
     </div>
+</div>
+
+<div>
 </div>
 
 <!-- Linking JS file -->
