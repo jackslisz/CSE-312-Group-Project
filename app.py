@@ -33,7 +33,7 @@ sock = Sock(app)
 #         uwsgi.websocket_send(msg)
 
 @app.route("/")
-@app.route("/home")
+@app.route("/home", methods=["GET,POST"])
 def home_page():
     #Retrieving the authentication token from browser
     auth_token_from_browser = request.cookies.get('auth_token', None)
@@ -207,6 +207,11 @@ def login_page():
         response = abort(401)
     #Returning the Flask response
     return response
+
+@app.route("/submit-answer",methods=["POST"])
+def submit_answer():
+    return redirect(url_for('home_page'))
+
 
 #Decorator to turn Python function like_message into Flask view function
 @app.route("/chat-like", methods=["POST"])
