@@ -123,7 +123,9 @@ def chat_message():
     #Splitting the body at the comma to separate the title from the description
     body = body.split(",", -1)
     for element in range(len(body)):
-        body[element] = body[element].split(":")[1].replace("\"","").replace("{","").replace("}","")
+        body[element] = body[element].split(":")[1].replace("\"","")
+        body[element] = body[element].replace("{","")
+        body[element] = body[element].replace("}","")
     # print(body)
     #Removing the key from the title value, leaving just the title the user entered
     # body[0] = body[0].replace("{\"title\":\"", "")

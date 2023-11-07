@@ -1,3 +1,4 @@
 pymongo
 bcrypt
 flask
+flask-sock

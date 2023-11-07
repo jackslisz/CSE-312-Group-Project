@@ -44,7 +44,6 @@ function likeMessage(messageId){
 }
 
 function chatMessageHTML(messageJSON) {
-    console.log(messageJSON);
     const username = messageJSON.username;
     const title = messageJSON.title;
     const likes = messageJSON.likes;
@@ -54,13 +53,9 @@ function chatMessageHTML(messageJSON) {
     const choice2 = messageJSON.choice2;
     const choice3 = messageJSON.choice3;
     const choice4 = messageJSON.choice4;
-    console.log(choice1);
-    console.log(choice2);
-    console.log(choice3);
-    console.log(choice4);
 
     let messageHTML =  
-    `<div class="new_chat_message">
+    `<div class=new_chat_message>
 	<i class="bi bi-person-fill"></i>
     <span id='message_${messageId}'>${username}<br></span>
     <font size="+2"><b>${title}</b></font>
@@ -73,24 +68,32 @@ function chatMessageHTML(messageJSON) {
     <label>
         1:
         <input id="Choice 1" type="radio" name="choices">
+    </label>
+    <label>
         ${choice1}
     </label>
     <br>
     <label>
         2:
         <input id="Choice 2" type="radio" name="choices">
+    </label>
+    <label>
         ${choice2}
     </label>
     <br>
     <label>
         3:
         <input id="Choice 3" type="radio" name="choices">
+    </label>
+    <label>
         ${choice3}
     </label>
     <br>
     <label>
         4:
         <input id="Choice 4" type="radio" name="choices">
+    </label>
+    <label>
         ${choice4}
     </label>
     <br>
@@ -111,32 +114,31 @@ function clearChat() {
 function addMessageToChat(messageJSON) {
     const chatMessages = document.getElementById("chat-messages");
     chatMessages.innerHTML += chatMessageHTML(messageJSON);
-    // console.log(chatMessageHTML(messageJSON));
     chatMessages.scrollIntoView(false);
     chatMessages.scrollTop = chatMessages.scrollHeight - chatMessages.clientHeight;
 }
 
-// function submitAnswer() {
-//     const request = new XMLHttpRequest();
-//     request.onreadystatechange = function () {
-//         if (this.readyState === 4 && this.status === 200) {
-//             console.log(this.response);
-//         }
-//     }
-//     var options = document.getElementsByName('choice');
-//     var selected;
-//     for(var i = 0; i < options.length; i++){
-//         if(options[i].checked){
-//             selected = options[i].value;
-//         }
-//     }
-//     const correct_answer = document.getElementById("right-option");
-//     const correct_answer_value = correct_answer.options[correct_answer.selectedIndex].text;
-//     const messageJSON = {"selected": selected, "correctornot": selected == correct_answer_value};
-//     // request.open("POST", "/chat-message");
-//     // request.send(JSON.stringify(messageJSON));
-//     // title_text_box.focus(); 
-// }
+function submitAnswer() {
+    const request = new XMLHttpRequest();
+    request.onreadystatechange = function () {
+        if (this.readyState === 4 && this.status === 200) {
+            console.log(this.response);
+        }
+    }
+    var options = document.getElementsByName('choice');
+    var selected;
+    for(var i = 0; i < options.length; i++){
+        if(options[i].checked){
+            selected = options[i].value;
+        }
+    }
+    const correct_answer = document.getElementById("right-option");
+    const correct_answer_value = correct_answer.options[correct_answer.selectedIndex].text;
+    const messageJSON = {"selected": selected, "correctornot": selected == correct_answer_value};
+    request.open("POST", "/chat-message");
+    request.send(JSON.stringify(messageJSON));
+    title_text_box.focus(); 
+}
 
 
 function sendChat() {
