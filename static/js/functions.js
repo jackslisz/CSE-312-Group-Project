@@ -100,8 +100,8 @@ function chatMessageHTML(messageJSON) {
     <input type="submit" value="Submit">
     </form>
     <br>
-    <button onclick='deleteMessage(${messageId})'>❌</button>&nbsp;
-	<button onclick='likeMessage(${messageId})'>💓&nbsp;(${likes})</button><br></br>
+    // <button onclick='deleteMessage(${messageId})'>❌</button>&nbsp;
+	// <button onclick='likeMessage(${messageId})'>💓&nbsp;(${likes})</button><br></br>
     </div>`
     return messageHTML;
 }
@@ -119,6 +119,7 @@ function addMessageToChat(messageJSON) {
 }
 
 function submitAnswer() {
+    console.log("submitanswercheck")
     const request = new XMLHttpRequest();
     request.onreadystatechange = function () {
         if (this.readyState === 4 && this.status === 200) {
@@ -134,9 +135,17 @@ function submitAnswer() {
     }
     const correct_answer = document.getElementById("right-option");
     const correct_answer_value = correct_answer.options[correct_answer.selectedIndex].text;
+    console.log("compfngwku4g check")
     const messageJSON = {"selected": selected, "correctornot": selected == correct_answer_value};
-    request.open("POST", "/chat-message");
-    request.send(JSON.stringify(messageJSON));
+    if(ws){
+        console.log("websocketreceptioncheck")
+        socket.send(JSON.stringify({'messageType': 'questionAnswer',"selected": selected, "correctornot": selected == correct_answer_value}));
+        console.log("postjkeb v")
+    }
+    else{
+        request.open("POST", "/submit-answer");
+        request.send(JSON.stringify(messageJSON));
+    }
     title_text_box.focus(); 
 }
 
@@ -172,15 +181,15 @@ function sendChat() {
     const messageJSON = {"title": title, "description": description, "choice1": choice1, "choice2": choice2, "choice3": choice3, "choice4": choice4, "correctanswer": correct_answer_value};
     request.open("POST", "/chat-message");
     if(ws){
-        socket.send(JSON.stringify({'messageType': 'chatMessage',"title": title, "description": description}));
+        socket.send(JSON.stringify({'messageType': 'chatMessage',"title": title, "description": description,"choice1": choice1, "choice2": choice2, "choice3": choice3, "choice4": choice4, "correctanswer": correct_answer_value}));
     }
     else{
         request.send(JSON.stringify(messageJSON));
         title_text_box.focus();
     }
 
-    request.send(JSON.stringify(messageJSON));
-    title_text_box.focus();
+    // request.send(JSON.stringify(messageJSON));
+    // title_text_box.focus();
 
     //     if (ws) {
     //     // Using WebSockets
