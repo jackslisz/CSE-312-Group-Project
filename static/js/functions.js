@@ -100,8 +100,8 @@ function chatMessageHTML(messageJSON) {
     <input type="submit" value="Submit">
     </form>
     <br>
-    // <button onclick='deleteMessage(${messageId})'>❌</button>&nbsp;
-	// <button onclick='likeMessage(${messageId})'>💓&nbsp;(${likes})</button><br></br>
+    <button onclick='deleteMessage(${messageId})'>❌</button>&nbsp;
+	<button onclick='likeMessage(${messageId})'>💓&nbsp;(${likes})</button><br></br>
     </div>`
     return messageHTML;
 }
