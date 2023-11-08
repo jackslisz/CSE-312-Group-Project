@@ -33,7 +33,7 @@ sock = Sock(app)
 #         uwsgi.websocket_send(msg)
 
 @app.route("/")
-@app.route("/home", methods=["GET,POST"])
+@app.route("/home", methods=["GET", "POST"])
 def home_page():
     #Retrieving the authentication token from browser
     auth_token_from_browser = request.cookies.get('auth_token', None)

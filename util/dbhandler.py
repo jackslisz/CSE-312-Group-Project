@@ -6,8 +6,8 @@ from html import *
 #Initialization function for both collections within the DB
 def db_init():
     #Creating variables to reference different layers of MongoDB
-    mongo_client = MongoClient("mongo")
-    # mongo_client = MongoClient("localhost")
+    # mongo_client = MongoClient("mongo")
+    mongo_client = MongoClient("localhost")
     db = mongo_client["CSE312-Project-One"]
     #Creating collection to reference the chat history
     chat_collection = db["chat"]
@@ -113,9 +113,9 @@ def get_msg_and_like(db, auth_token_from_browser, objectId):
         #If so, creating a new list with the liked person removed
         likers2 = list(likers)
         likers2.remove(get_auth_tokens_value["username"])
-        print("i deletwed ad got", likers2)
+        print("i deleted and got", likers2)
         #Checking if the user was removed successfully
-        print(get_auth_tokens_value["username"], "is unliking")
+        print(get_auth_tokens_value["username"], "is un-liking")
         # print(li)
         if(not likers2):
             #Avoid NoneType error
