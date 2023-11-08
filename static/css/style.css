@@ -1,6 +1,6 @@
 /* Changing all occurrences of body to have properties below */
 body {
-    background-color: #313131;
+    background-color: rgb(106, 13, 156);
     color: rgb(255, 255, 255);
 }
 
@@ -18,14 +18,14 @@ img.post {
 .title{
     height: 5%;
     text-align: center;
-    color: rgb(75, 255, 117);
+    color: rgb(240, 241, 129);
 }
 
 /* Changing all occurrences of class header to have properties below */
 .header{
     display: flex;
-    background-color: #5c5c5c;
-    color: rgb(75, 255, 117);
+    background-color: rgb(164, 87, 230);
+    color: rgb(240, 241, 129);
     height: 17%;
     align-items: center;
 }
@@ -44,7 +44,7 @@ img.post {
 /* Changing all occurrences of class chat to have properties below */
 .chat{
     width: 70%;
-    background-color: #313131;
+    background-color: rgb(106, 13, 156);
     padding: 20px;
 }
 
@@ -62,7 +62,7 @@ img.post {
 /* Changing all occurrences of class user-list to have properties below */
 .user-list{
     width: 100%;
-    background-color: #313131;
+    background-color: rgb(106, 13, 156);
     /* margin-left:  125px; */
 }
 
@@ -78,7 +78,7 @@ img.post {
 
 /* Creating a class to display the user's username */
 .display_username{
-    color: rgb(75, 255, 117);
+    color: rgb(240, 241, 129);
 }
 
 /* Creating a class to display the all chat messages */

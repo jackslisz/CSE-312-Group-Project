@@ -230,7 +230,7 @@ function welcome() {
         }
     });
 
-    document.getElementById("paragraph").innerHTML = "<br/>Welcome to the best chat system ever!!! Here you can chat and share images with other users 🤠";
+    document.getElementById("paragraph").innerHTML = "<center>Post and answer questions using the form below! Do you have what it takes to be the ultimate QUIZMASTER??? 🤔</center>";
     document.getElementById("chat-messages").focus();
 
     updateChat();
