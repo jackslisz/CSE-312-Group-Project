@@ -7,6 +7,7 @@ body {
 /* Changing all occurrences of class my_image to have properties below */
 .my_image {
     height: 80%;
+    width: 175;
 }
 
 /* Changing all occurrences of class post to have properties below */
