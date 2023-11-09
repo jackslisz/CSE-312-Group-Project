@@ -36,6 +36,19 @@ def update_id(db):
     #Calling the update_one function to increment the current ID value
     counter_collection.update_one({}, {"$set": {"count": counter_collection.find_one({},{}).get("count") + 1}})
 
+
+#Function to insert a message into DB with websocket
+def insert_message_websocket(db, body, username):
+    #Re-establishing collections to account for chat history and unique IDs
+    chat_collection = db["chat"]
+    counter_collection = db["counter"]
+    #Calling the insert_one function to insert the message into the DB
+    # print(body)
+    #{"messageType":"chatMessage","title":"fegfeg","description":"e5h5r","choice1":"h5","choice2":"h5rh","choice3":"r5hr","choice4":"jh","correctanswer":"Choice 1"}
+    chat_collection.insert_one({"username": username, "title": escape(body["title"]), "description": escape(body["description"]), "choice1": escape(body["choice1"]), "choice2": escape(body["choice2"]), "choice3": escape(body["choice3"]), "choice4": escape(body["choice4"]), "correctanswer": escape(body["correctanswer"]), "id": int(counter_collection.find_one({},{}).get("count"))})
+
+    print(chat_collection.find_one({"username":username}))
+
 #Function to insert a message into DB
 def insert_message(db, body, username):
     #Re-establishing collections to account for chat history and unique IDs

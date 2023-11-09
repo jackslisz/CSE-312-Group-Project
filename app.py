@@ -62,7 +62,25 @@ def home_page():
 def echo(ws):
     while True:
         data = ws.receive()
-        print(data)
+        # print(data)
+        # print(data)
+        data = loads(data)
+        auth_token_from_browser = request.cookies.get('auth_token', None)
+    #Checking if the user has an auth token present
+        if auth_token_from_browser is not None:
+            #Hashing the token by calling the SHA256 function
+            encrypt_auth_token = sha256(auth_token_from_browser.encode()).digest()
+            #Checking whether the DB contains that auth token 
+            if(get_auth_tokens(db, encrypt_auth_token)):
+                #If so, updating the unique ID of the new message
+                update_id(db)
+                #Inserting the message into the DB using splicing
+                print(get_auth_tokens(db, encrypt_auth_token)["username"])
+
+                insert_message_websocket(db, data, get_auth_tokens(db, encrypt_auth_token)["username"])
+                data.update({"username" : get_auth_tokens(db, encrypt_auth_token)["username"]})
+                print(data)
+        data = dumps(data)
         ws.send(data)
 
 #Decorator to turn Python function style_page into Flask view function
