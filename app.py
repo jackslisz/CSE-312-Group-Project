@@ -13,7 +13,7 @@ from flask_sock import Sock
 
 #Creating Flask app instance and storing it in app
 #__name__ holds the name of current Python module
-app = Flask(__name__)
+app = Flask(__name__, static_url_path="/static")
 #Initializing the Database (DB)
 db = db_init()
 
@@ -143,6 +143,8 @@ def chat_message():
         if(get_auth_tokens(db, encrypt_auth_token)):
             #If so, updating the unique ID of the new message
             update_id(db)
+            # print("e", encrypt_auth_token)
+            # print(get_auth_tokens(db, encrypt_auth_token))
             #Inserting the message into the DB using splicing
             insert_message(db, body, get_auth_tokens(db, encrypt_auth_token)["username"])
     #Calling make_response to make an empty flask response

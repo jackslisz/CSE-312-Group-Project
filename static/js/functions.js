@@ -44,6 +44,8 @@ function likeMessage(messageId){
 }
 
 function chatMessageHTML(messageJSON) {
+    console.log(document.getElementById("formfile").files[0]);
+    // console.log(messageJSON);
     const username = messageJSON.username;
     const title = messageJSON.title;
     const likes = messageJSON.likes;
@@ -53,7 +55,7 @@ function chatMessageHTML(messageJSON) {
     const choice2 = messageJSON.choice2;
     const choice3 = messageJSON.choice3;
     const choice4 = messageJSON.choice4;
-
+    const image = document.getElementById("formfile").files[0].name;
     let messageHTML =  
     `<div class=new_chat_message>
 	<i class="bi bi-person-fill"></i>
@@ -61,6 +63,7 @@ function chatMessageHTML(messageJSON) {
     <font size="+2"><b>${title}</b></font>
     <br>
     <a><b>${description}<b></a>
+    <img src="/static/img/${image}">
     <hr style="border: 1px dotted #ffffff;">
     </div>
     <div>
