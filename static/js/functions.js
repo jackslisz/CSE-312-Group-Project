@@ -44,7 +44,7 @@ function likeMessage(messageId){
 }
 
 function chatMessageHTML(messageJSON) {
-    console.log(document.getElementById("formfile").files[0]);
+    // console.log(document.getElementById("formfile").files[0]);
     // console.log(messageJSON);
     const username = messageJSON.username;
     const title = messageJSON.title;
@@ -55,12 +55,14 @@ function chatMessageHTML(messageJSON) {
     const choice2 = messageJSON.choice2;
     const choice3 = messageJSON.choice3;
     const choice4 = messageJSON.choice4;
-    const image = null;
+    // const image = null;
     
+    const image = 'quizicon.ico';
     let messageHTML =  
     `<div class=new_chat_message>
 	<i class="bi bi-person-fill"></i>
-    <span id='message_${messageId}'>${username}<br></span>
+    <span id='message_${messageId}'>${username}<br><br></span>
+    <img src="/static/img/${image}"></br></br>
     <font size="+2"><b>${title}</b></font>
     <br>
     <a><b>${description}<b></a>
@@ -103,14 +105,17 @@ function chatMessageHTML(messageJSON) {
     <input type="submit" value="Submit">
     </form>
     <br>
-    <button onclick='deleteMessage(${messageId})'>❌</button>&nbsp;
-	<button onclick='likeMessage(${messageId})'>💓&nbsp;(${likes})</button><br></br>
     </div>`
     if (document.getElementById("formfile").files[0] != undefined) {
         const image = document.getElementById("formfile").files[0].name;
         messageHTML = messageHTML.replace(`<hr style=\"border: 1px dotted #ffffff;\">`,`<br><img src=\"static/img/${image}\"></img><hr style=\"border: 1px dotted #ffffff;\">`);
         console.log(messageHTML);
     }
+
+    // THE FOLLOWING 2 LINES WERE REMOVED FROM AFTER LINE 105
+    // <button onclick='deleteMessage(${messageId})'>❌</button>&nbsp;
+	// <button onclick='likeMessage(${messageId})'>💓&nbsp;(${likes})</button><br></br>
+
     return messageHTML;
 }
 
@@ -242,10 +247,11 @@ function welcome() {
     document.getElementById("chat-messages").focus();
 
     updateChat();
-    setInterval(updateChat, 2000);
+
     if (ws) {
         initWS();
     } else {
+        setInterval(updateChat, 2000);
         const videoElem = document.getElementsByClassName('video-chat')[0];
         videoElem.parentElement.removeChild(videoElem);
         setInterval(updateChat, 2000);
