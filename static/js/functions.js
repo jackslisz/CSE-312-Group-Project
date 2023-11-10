@@ -236,11 +236,11 @@ function welcome() {
     document.getElementById("paragraph").innerHTML = "<center>Post and answer questions using the form below! Do you have what it takes to be the ultimate QUIZMASTER??? 🤔</center>";
     document.getElementById("chat-messages").focus();
 
-    updateChat();
-    setInterval(updateChat, 2000);
     if (ws) {
         initWS();
     } else {
+        updateChat();
+        setInterval(updateChat, 2000);
         const videoElem = document.getElementsByClassName('video-chat')[0];
         videoElem.parentElement.removeChild(videoElem);
         setInterval(updateChat, 2000);

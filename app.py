@@ -21,9 +21,6 @@ db = db_init()
 
 sock = Sock(app)
 
-
-
-
 # @app.route("/websocket")
 # def application(env, start_response):
 #     # complete the handshake
@@ -56,8 +53,6 @@ def home_page():
     #Returning the finished response
     return response
 
-
-
 @sock.route('/websocket')
 def echo(ws):
     while True:
@@ -76,7 +71,13 @@ def echo(ws):
                 update_id(db)
                 #Inserting the message into the DB using splicing
                 print(get_auth_tokens(db, encrypt_auth_token)["username"])
-
+                data["title"] = escape(data["title"])
+                data["description"] = escape(data["description"])
+                data["choice1"] = escape(data["choice1"])
+                data["choice2"] = escape(data["choice2"])
+                data["choice3"] = escape(data["choice3"])
+                data["choice4"] = escape(data["choice4"])
+                data["correctanswer"] = escape(data["correctanswer"])
                 insert_message_websocket(db, data, get_auth_tokens(db, encrypt_auth_token)["username"])
                 data.update({"username" : get_auth_tokens(db, encrypt_auth_token)["username"]})
                 print(data)
@@ -90,8 +91,7 @@ def style_page(file_path):
     response = send_from_directory('static/css/', file_path)
     #Setting the nosniff header
     response.headers['X-Content-Type-Options'] = 'nosniff' 
-    #Setting the correct MIME type for C
-    # SS
+    #Setting the correct MIME type for CSS
     response.headers['Content-Type'] = 'text/css; charset=utf-8'    
     #Returning the finished response
     return response
@@ -168,16 +168,16 @@ def chat_message():
     #Calling make_response to make an empty flask response
     return make_response(f"")
 
-##Decorator to turn Python function chat_history into Flask view function
-##Commented to test functionality of websocket. If this is commented and new chat messages appear, websocket is the only functionality that enables this.
-# @app.route('/chat-history')
-# def chat_history():
-#     #Checking if the chat's history is not empty
-#     if get_chat_history(db):
-#         #Dumping the entire chat history into a JSON string
-#         chat_history = dumps(list(get_chat_history(db))).encode()
-#         #Calling make_response to make a response using the JSON object in chat_history
-#         return make_response(chat_history)
+#Decorator to turn Python function chat_history into Flask view function
+#Commented to test functionality of websocket. If this is commented and new chat messages appear, websocket is the only functionality that enables this.
+@app.route('/chat-history')
+def chat_history():
+    #Checking if the chat's history is not empty
+    if get_chat_history(db):
+        #Dumping the entire chat history into a JSON string
+        chat_history = dumps(list(get_chat_history(db))).encode()
+        #Calling make_response to make a response using the JSON object in chat_history
+        return make_response(chat_history)
     
 #Decorator to turn Python function register_user into Flask view function
 @app.route('/register', methods=["POST"])
