@@ -11,7 +11,7 @@ function initWS() {
         const messageType = message.messageType
         if(messageType === 'chatMessage'){
             addMessageToChat(message);
-        }else{
+        } else {
             // send message to WebRTC
             processMessageAsWebRTC(message, messageType);
         }
@@ -55,7 +55,8 @@ function chatMessageHTML(messageJSON) {
     const choice2 = messageJSON.choice2;
     const choice3 = messageJSON.choice3;
     const choice4 = messageJSON.choice4;
-    const image = document.getElementById("formfile").files[0].name;
+    const image = null;
+    
     let messageHTML =  
     `<div class=new_chat_message>
 	<i class="bi bi-person-fill"></i>
@@ -63,7 +64,6 @@ function chatMessageHTML(messageJSON) {
     <font size="+2"><b>${title}</b></font>
     <br>
     <a><b>${description}<b></a>
-    <img src="/static/img/${image}">
     <hr style="border: 1px dotted #ffffff;">
     </div>
     <div>
@@ -106,6 +106,11 @@ function chatMessageHTML(messageJSON) {
     <button onclick='deleteMessage(${messageId})'>❌</button>&nbsp;
 	<button onclick='likeMessage(${messageId})'>💓&nbsp;(${likes})</button><br></br>
     </div>`
+    if (document.getElementById("formfile").files[0] != undefined) {
+        const image = document.getElementById("formfile").files[0].name;
+        messageHTML = messageHTML.replace(`<hr style=\"border: 1px dotted #ffffff;\">`,`<br><img src=\"static/img/${image}\"></img><hr style=\"border: 1px dotted #ffffff;\">`);
+        console.log(messageHTML);
+    }
     return messageHTML;
 }
 

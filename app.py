@@ -56,8 +56,6 @@ def home_page():
     #Returning the finished response
     return response
 
-
-
 @sock.route('/websocket')
 def echo(ws):
     while True:
@@ -119,7 +117,7 @@ def visit_counter_cookie():
 def chat_message():
     #Retrieving the entire body of the request by calling get_data()
     body = request.get_data().decode()
-    print(f"body: {body}")
+    # print(f"body: {body}")
     #Splitting the body at the comma to separate the title from the description
     body = body.split(",", -1)
     for element in range(len(body)):
@@ -166,6 +164,7 @@ def chat_message():
 def register_user():
     #Retrieving the entire body of the request by calling get_data()
     creds = request.get_data().decode()
+    print(creds)
     #Splitting the body to store the username (0) and password (1) inside creds
     creds = creds.split('&', 1)
     #Removing key from username/password to leave just the username/password
@@ -210,10 +209,46 @@ def login_page():
     #Returning the Flask response
     return response
 
+
+#Decorator to turn Python function login_page into Flask view function
+@app.route("/image", methods=["POST"])
+def image():
+    #Retrieve the data 
+    if request.files:
+        file = request.files["upload"]
+        response = redirect(url_for('home_page'))
+
+        if file.filename == "":
+            return response
+
+        file.save("static/img/" + file.filename)
+        print(f"File: {file}")
+    # Obtain the unencrypted password
+    # Obtain username
+    # username = json_log_data[0].split("=")[1]
+    # Run a function to check whether the username and password match in the DB
+    # authentication_attempt = check_creds(db, [username, unencrypted_password])
+    # if(authentication_attempt):
+    #     #If successful, create, Hash and store a random auth token
+    #     gen_auth_token = token_urlsafe(16)
+    #     #Calling gen_auth_token to generate a new auth token value for user
+    #     encrypt_auth_token = gen_auth_token
+    #     #Hashing the token by calling the SHA256 function
+    #     encrypt_auth_token = sha256(encrypt_auth_token.encode()).digest()
+    #     #Calling add_auth to add the token to the DB
+    #     add_auth(db, authentication_attempt, encrypt_auth_token)
+    #     #Calling make_response to make and send a Flask response
+    #     #Make cookie of auth_token
+    #     response.set_cookie('auth_token', gen_auth_token, max_age=3600, httponly=True) 
+    # #Otherwise, returning error message 401
+    # else:
+    #     response = abort(401)
+    #Returning the Flask response
+    return response
+        
 @app.route("/submit-answer",methods=["POST"])
 def submit_answer():
     return redirect(url_for('home_page'))
-
 
 #Decorator to turn Python function like_message into Flask view function
 @app.route("/chat-like", methods=["POST"])
@@ -222,7 +257,7 @@ def like_message():
     body = request.get_data().decode()
     #Splitting the body at the colon to separate the message
     #Retrieving the auth token from the user's browser
-    auth_token_from_browser  =request.cookies.get('auth_token', None)
+    auth_token_from_browser = request.cookies.get('auth_token', None)
     # SH256 encrypting auth token to check with DB. This is to ensure only logged-in users are able to like
     #Checking if there is any auth token in the browser
     if(auth_token_from_browser):

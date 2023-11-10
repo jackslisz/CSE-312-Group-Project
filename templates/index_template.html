@@ -44,7 +44,7 @@
                         <input id="reg-form-pass" type="password" name="password_reg">
                     </label>
                     <br>
-                    <input type="submit" value="Submit" onclick=submitAnswer()>
+                    <input type="submit" value="Submit" onclick="submitAnswer()">
                 </form>
             </div>
             <div>
@@ -66,58 +66,62 @@
     </div>
 
     <div class="chat-form" style="padding: 10px">
-        <h2>Post a new question:</h2>
-        <br>
-        
-        <label>
-            Title:
-            <input id="title-text-box" type="text">
-        </label>
-        <p></p>
-        <label>
-            Description:
-            <input id="description-text-box" type="text">
-        </label>
-        <hr>
-        <!---->
-        <label>
-            Choice 1:
-            <input id="choice-1-text" type="text" placeholder="Choice 1">
-        </label>
-        <br>
-        <label>
-            Choice 2:
-            <input id="choice-2-text" type="text" placeholder="Choice 2">
-        </label>
-        <br>
-        <label>
-            Choice 3:
-            <input id="choice-3-text" type="text" placeholder="Choice 3">
-        </label>
-        <br>
-        <label>
-            Choice 4:
-            <input id="choice-4-text" type="text" placeholder="Choice 4">
-        </label>
-        <br>
-        <label>
-            Correct Option:
-        <label>
-        <select name="right-option" id="right-option">
-            <option value="choice-1">Choice 1</option>
-            <option value="choice-2">Choice 2</option>
-            <option value="choice-3">Choice 3</option>
-            <option value="choice-4">Choice 4</option>
-        </select>
-        <hr>
-        <form id="image-form" method="post" enctype="multipart/form-data">
+        <form action="/image" method="post" enctype="multipart/form-data">
+            <h2>Post a new question:</h2>
+            <br>
+            <label>
+                Title:
+                <input id="title-text-box" type="text">
+            </label>
+            <p></p>
+            <label>
+                Description:
+                <input id="description-text-box" type="text">
+            </label>
+            <hr>
+            <!---->
+            <label>
+                Choice 1:
+                <input id="choice-1-text" type="text" placeholder="Choice 1">
+            </label>
+            <br>
+            <label>
+                Choice 2:
+                <input id="choice-2-text" type="text" placeholder="Choice 2">
+            </label>
+            <br>
+            <label>
+                Choice 3:
+                <input id="choice-3-text" type="text" placeholder="Choice 3">
+            </label>
+            <br>
+            <label>
+                Choice 4:
+                <input id="choice-4-text" type="text" placeholder="Choice 4">
+            </label>
+            <br>
+            <label>
+                Correct Option:
+            <label>
+            <select name="right-option" id="right-option">
+                <option value="choice-1">Choice 1</option>
+                <option value="choice-2">Choice 2</option>
+                <option value="choice-3">Choice 3</option>
+                <option value="choice-4">Choice 4</option>
+            </select>
+            <hr>
             <label for="formfile">(Optional) Upload an image for your question: </label>
             <input id="formfile" type="file" name="upload">
             <br/>
             <p class="horizontal_space"></p>
+            <!--<form action="/image" id="image-form" method="post" >
+                <label for="formfile">(Optional) Upload an image for your question: </label>
+                <input id="formfile" type="file" name="upload">
+                <br/>
+                <p class="horizontal_space"></p>
+            </form>-->
+            <button id="chat-button" onclick="sendChat()">Post</button>
         </form>
-        <button id="chat-button" onclick="sendChat()">Post</button>
-
     </div>
 </div>
 
