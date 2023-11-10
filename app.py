@@ -58,8 +58,8 @@ def echo(ws):
     while True:
         data = ws.receive()
         # print(data)
-        # print(data)
         data = loads(data)
+        print(data)
         auth_token_from_browser = request.cookies.get('auth_token', None)
     #Checking if the user has an auth token present
         if auth_token_from_browser is not None:
@@ -67,22 +67,27 @@ def echo(ws):
             encrypt_auth_token = sha256(auth_token_from_browser.encode()).digest()
             #Checking whether the DB contains that auth token 
             if(get_auth_tokens(db, encrypt_auth_token)):
-                #If so, updating the unique ID of the new message
-                update_id(db)
-                #Inserting the message into the DB using splicing
-                print(get_auth_tokens(db, encrypt_auth_token)["username"])
-                data["title"] = escape(data["title"])
-                data["description"] = escape(data["description"])
-                data["choice1"] = escape(data["choice1"])
-                data["choice2"] = escape(data["choice2"])
-                data["choice3"] = escape(data["choice3"])
-                data["choice4"] = escape(data["choice4"])
-                data["correctanswer"] = escape(data["correctanswer"])
-                insert_message_websocket(db, data, get_auth_tokens(db, encrypt_auth_token)["username"])
-                data.update({"username" : get_auth_tokens(db, encrypt_auth_token)["username"]})
-                print(data)
-        data = dumps(data)
-        ws.send(data)
+                #Checking if the incoming request is a new message
+                if data["messageType"] == "chatMessage":
+                    #If so, updating the unique ID of the new message
+                    update_id(db)
+                    #Inserting the message into the DB using splicing
+                    # print(get_auth_tokens(db, encrypt_auth_token)["username"])
+                    data["title"] = escape(data["title"])
+                    data["description"] = escape(data["description"])
+                    data["choice1"] = escape(data["choice1"])
+                    data["choice2"] = escape(data["choice2"])
+                    data["choice3"] = escape(data["choice3"])
+                    data["choice4"] = escape(data["choice4"])
+                    data["correctanswer"] = escape(data["correctanswer"])
+                    insert_message_websocket(db, data, get_auth_tokens(db, encrypt_auth_token)["username"])
+                    data.update({"username" : get_auth_tokens(db, encrypt_auth_token)["username"]})
+                    # print(data)
+                #Checking if the incoming request is an answer to a question
+                elif data["messageType"] == "questionAnswer":
+                    pass
+                data = dumps(data)
+                ws.send(data)
 
 #Decorator to turn Python function style_page into Flask view function
 @app.route('/static/css/<path:file_path>')
@@ -137,7 +142,7 @@ def visit_counter_cookie():
 def chat_message():
     #Retrieving the entire body of the request by calling get_data()
     body = request.get_data().decode()
-    print(f"body: {body}")
+    # print(f"body: {body}")
     #Splitting the body at the comma to separate the title from the description
     body = body.split(",", -1)
     for element in range(len(body)):
@@ -228,8 +233,19 @@ def login_page():
     #Returning the Flask response
     return response
 
-@app.route("/submit-answer",methods=["POST"])
+@app.route("/submit-answer", methods=["POST"])
 def submit_answer():
+    #Retrieving the authentication token
+    auth_token_from_browser = request.cookies.get('auth_token', None)
+    #Checking if the user has an auth token present
+    if auth_token_from_browser is not None:
+        #Hashing the token by calling the SHA256 function
+        encrypt_auth_token = sha256(auth_token_from_browser.encode()).digest()
+        #Checking whether the DB contains that auth token 
+        if(get_auth_tokens(db, encrypt_auth_token)):
+            pass
+
+
     return redirect(url_for('home_page'))
 
 

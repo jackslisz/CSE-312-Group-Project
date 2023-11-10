@@ -47,7 +47,7 @@ def insert_message_websocket(db, body, username):
     #{"messageType":"chatMessage","title":"fegfeg","description":"e5h5r","choice1":"h5","choice2":"h5rh","choice3":"r5hr","choice4":"jh","correctanswer":"Choice 1"}
     chat_collection.insert_one({"username": username, "title": body["title"], "description": body["description"], "choice1": body["choice1"], "choice2": body["choice2"], "choice3": body["choice3"], "choice4": body["choice4"], "correctanswer": body["correctanswer"], "id": int(counter_collection.find_one({},{}).get("count"))})
 
-    print(chat_collection.find_one({"username":username}))
+    # print(chat_collection.find_one({"username":username}))
 
 #Function to insert a message into DB
 def insert_message(db, body, username):
