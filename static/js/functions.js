@@ -69,7 +69,7 @@ function chatMessageHTML(messageJSON) {
     <hr style="border: 1px dotted #ffffff;">
     </div>
     <div>
-    <form onsubmit="submitAnswer()" method="post">
+    <form onsubmit="submitAnswer(event)" method="post">
     <label>
         1:
         <input id="Choice 1" type="radio" name="choices">
@@ -131,7 +131,8 @@ function addMessageToChat(messageJSON) {
     chatMessages.scrollTop = chatMessages.scrollHeight - chatMessages.clientHeight;
 }
 
-function submitAnswer() {
+function submitAnswer(event) {
+    event.preventDefault();
     console.log("submitanswercheck")
     const request = new XMLHttpRequest();
     request.onreadystatechange = function () {
