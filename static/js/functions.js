@@ -56,8 +56,8 @@ function chatMessageHTML(messageJSON) {
     const choice3 = messageJSON.choice3;
     const choice4 = messageJSON.choice4;
     // const image = null;
-    
     const image = 'quizicon.ico';
+
     let messageHTML =  
     `<div class=new_chat_message>
 	<i class="bi bi-person-fill"></i>
@@ -108,7 +108,7 @@ function chatMessageHTML(messageJSON) {
     </div>`
     if (document.getElementById("formfile").files[0] != undefined) {
         const image = document.getElementById("formfile").files[0].name;
-        messageHTML = messageHTML.replace(`<hr style=\"border: 1px dotted #ffffff;\">`,`<br><img src=\"static/img/${image}\"></img><hr style=\"border: 1px dotted #ffffff;\">`);
+        messageHTML = messageHTML.replace(`<span id='message_${messageId}'>${username}<br><br></span><img src="/static/img/quizicon.ico"></br></br><font size="+2"><b>${title}</b></font>`,`<span id='message_${messageId}'>${username}<br><br></span><img src="/static/img/${image}"></br></br><font size="+2"><b>${title}</b></font>`);
         console.log(messageHTML);
     }
 

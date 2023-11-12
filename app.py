@@ -60,8 +60,9 @@ def echo(ws):
         # print(data)
         data = loads(data)
         print(data)
+        #Retrieving the authentication token from browser
         auth_token_from_browser = request.cookies.get('auth_token', None)
-    #Checking if the user has an auth token present
+        #Checking if the user has an auth token present
         if auth_token_from_browser is not None:
             #Hashing the token by calling the SHA256 function
             encrypt_auth_token = sha256(auth_token_from_browser.encode()).digest()
@@ -189,7 +190,7 @@ def chat_history():
 def register_user():
     #Retrieving the entire body of the request by calling get_data()
     creds = request.get_data().decode()
-    print(creds)
+    # print(creds)
     #Splitting the body to store the username (0) and password (1) inside creds
     creds = creds.split('&', 1)
     #Removing key from username/password to leave just the username/password
@@ -238,16 +239,21 @@ def login_page():
 #Decorator to turn Python function login_page into Flask view function
 @app.route("/image", methods=["POST"])
 def image():
-    #Retrieve the data 
-    if request.files:
-        file = request.files["upload"]
-        response = redirect(url_for('home_page'))
-
-        if file.filename == "":
-            return response
-
-        file.save("static/img/" + file.filename)
-        print(f"File: {file}")
+    #Retrieving the authentication token from browser
+    auth_token_from_browser = request.cookies.get('auth_token', None)
+    #Checking if the user has an auth token present
+    if auth_token_from_browser is not None:
+        #Hashing the token by calling the SHA256 function
+        encrypt_auth_token = sha256(auth_token_from_browser.encode()).digest()
+        #Checking whether the DB contains that auth token 
+        if(get_auth_tokens(db, encrypt_auth_token)):
+            #Retrieve the data 
+            if request.files:
+                file = request.files["upload"]
+                if file.filename == "":
+                    return redirect(url_for('home_page'))
+                image_name = insert_image(db)
+                file.save(image_name)
     # Obtain the unencrypted password
     # Obtain username
     # username = json_log_data[0].split("=")[1]
@@ -269,7 +275,7 @@ def image():
     # else:
     #     response = abort(401)
     #Returning the Flask response
-    return response
+    return redirect(url_for('home_page'))
         
 @app.route("/submit-answer", methods=["POST"])
 def submit_answer():
