@@ -43,6 +43,18 @@ function likeMessage(messageId){
     // request.send();
 }
 
+function openFile(file) {
+    var reader = new FileReader();
+    reader.onload = function(){
+      var dataURL = reader.result;
+      var output = document.getElementById('img');
+      output.src = dataURL;
+    };
+    // reader.readAsDataURL(file);
+    console.log(file);
+};
+
+
 function chatMessageHTML(messageJSON) {
     // console.log(document.getElementById("formfile").files[0]);
     // console.log(messageJSON);
@@ -56,13 +68,21 @@ function chatMessageHTML(messageJSON) {
     const choice3 = messageJSON.choice3;
     const choice4 = messageJSON.choice4;
     // const image = null;
-    const image = 'quizicon.ico';
-
+    // const image = 'quizicon.ico';
+    let image = "static/img/quizicon.ico";
+    // if (document.getElementById("formfile").files[0] != undefined) {
+    //     // image = openFile()
+    // }
+    // if (document.getElementById("formfile").files != []) {
+    //     console.log(document.getElementById("formfile").files[0]);
+    //     image = openFile(document.getElementById("formfile").files[0]);
+    //     console.log(image);
+    // }
     let messageHTML =  
     `<div class=new_chat_message>
 	<i class="bi bi-person-fill"></i>
     <span id='message_${messageId}'>${username}<br><br></span>
-    <img src="/static/img/${image}"></br></br>
+    <img src="/static/img/image.jpg" id="img" width="100" height="100"></br>
     <font size="+2"><b>${title}</b></font>
     <br>
     <a><b>${description}<b></a>
@@ -106,11 +126,11 @@ function chatMessageHTML(messageJSON) {
     </form>
     <br>
     </div>`
-    if (document.getElementById("formfile").files[0] != undefined) {
-        const image = document.getElementById("formfile").files[0].name;
-        messageHTML = messageHTML.replace(`<span id='message_${messageId}'>${username}<br><br></span><img src="/static/img/quizicon.ico"></br></br><font size="+2"><b>${title}</b></font>`,`<span id='message_${messageId}'>${username}<br><br></span><img src="/static/img/${image}"></br></br><font size="+2"><b>${title}</b></font>`);
-        console.log(messageHTML);
-    }
+    // if (document.getElementById("formfile").files[0] != undefined) {
+    //     const image = document.getElementById("formfile").files[0].name;
+    //     messageHTML = messageHTML.replace(`<span id='message_${messageId}'>${username}<br><br></span><img src="/static/img/quizicon.ico"></br></br><font size="+2"><b>${title}</b></font>`,`<span id='message_${messageId}'>${username}<br><br></span><img src="/static/img/${image}"></br></br><font size="+2"><b>${title}</b></font>`);
+    //     console.log(messageHTML);
+    // }
 
     // THE FOLLOWING 2 LINES WERE REMOVED FROM AFTER LINE 105
     // <button onclick='deleteMessage(${messageId})'>❌</button>&nbsp;

@@ -111,7 +111,7 @@
             </select>
             <hr>
             <label for="formfile">(Optional) Upload an image for your question: </label>
-            <input id="formfile" type="file" name="upload">
+            <input id="formfile" type="file" name="upload" onchange="console.log(this.value);">
             <br/>
             <p class="horizontal_space"></p>
             <!--<form action="/image" id="image-form" method="post" >
@@ -120,7 +120,7 @@
                 <br/>
                 <p class="horizontal_space"></p>
             </form>-->
-            <button id="chat-button" onclick="sendChat()">Post</button>
+            <button id="chat-button" onclick="sendChat();">Post</button>
         </form>
     </div>
 </div>
