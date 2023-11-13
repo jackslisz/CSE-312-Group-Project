@@ -6,8 +6,8 @@ from html import *
 #Initialization function for both collections within the DB
 def db_init():
     #Creating variables to reference different layers of MongoDB
-    mongo_client = MongoClient("mongo")
-# mongo_client = MongoClient("localhost")
+    # mongo_client = MongoClient("mongo")
+    mongo_client = MongoClient("localhost")
     db = mongo_client["CSE312-Project-One"]
     #Creating collection to reference the chat history
     chat_collection = db["chat"]
@@ -16,6 +16,8 @@ def db_init():
     #Creating collection to account for unique IDs of messages and images
     counter_collection = db["counter"]
     image_counter = db["image_counter"]
+    answer_collection = db["ans"]
+    question_collection  = db["question"]
     #Checking if the counter collection is initialized already
     if counter_collection.count_documents({}) == 0:
         #If not, initializing it to 0
@@ -34,12 +36,36 @@ def get_chat_history(db):
     #Returning all of the chat's history
     return chat_collection.find({}, {"_id": 0})
 
+
+def get_chat_history_particular_username(db,usernm):
+    #Re-establishing the collection to reference the chat history
+    chat_collection = db["chat"]
+    #Returning all of the chat's history
+    return chat_collection.find({"username":usernm}, {"_id": 0})
+
 #Function to increment the unique ID value in the counter collection
 def update_id(db):
     #Re-establishing the collection to account for unique IDs
     counter_collection = db["counter"]
     #Calling the update_one function to increment the current ID value
     counter_collection.update_one({}, {"$set": {"count": counter_collection.find_one({},{}).get("count") + 1}})
+#FOR STUDENTS
+def answer(db,ans,correct,usrn):
+    chat_collection = db["chat"]
+    answer_collection = db["ans"]
+    answer_collection.insert_one({"question":ans["question"],"answer":ans["selected"],"correctornot":ans["correctornot"], "username":usrn})
+    
+
+
+def get_grades(db,username):
+    answer_collection = db["ans"]
+    return answer_collection.find({"username":username})
+
+
+def question(db,q,usrn):
+    chat_collection = db["chat"]
+    question_collection = db["question"]
+    question_collection.insert_one({"question":question["question"],"answer":question["selected"],"correctornot":question["correctornot"], "username":usrn})
 
 #Function to insert a message into DB with websocket
 def insert_message_websocket(db, body, username):
@@ -49,13 +75,14 @@ def insert_message_websocket(db, body, username):
     #Calling the insert_one function to insert the message into the DB
     # print(body)
     #{"messageType":"chatMessage","title":"fegfeg","description":"e5h5r","choice1":"h5","choice2":"h5rh","choice3":"r5hr","choice4":"jh","correctanswer":"Choice 1"}
-    chat_collection.insert_one({"username": username, "image": "static/img/quizicon.ico", "title": body["title"], "description": body["description"], "choice1": body["choice1"], "choice2": body["choice2"], "choice3": body["choice3"], "choice4": body["choice4"], "correctanswer": body["correctanswer"], "id": int(counter_collection.find_one({},{}).get("count"))})
-
+    id_=int(counter_collection.find_one({},{}).get("count"))
+    chat_collection.insert_one({"username": username, "title": body["title"], "description": body["description"], "choice1": body["choice1"], "choice2": body["choice2"], "choice3": body["choice3"], "choice4": body["choice4"], "correctanswer": body["correctanswer"], "id":id_})
+    return id_
     # print(chat_collection.find_one({"username":username}))
 
 #Function to increment the unique image ID value in the image counter collection
 #This function also adds the image name to the user's credentials profile
-def insert_image(db, image):
+def insert_image(db):
     #Re-establishing collections to reference credentials and message/image ID collections
     chat_collection = db["chat"]
     counter_collection = db["counter"]
@@ -63,11 +90,18 @@ def insert_image(db, image):
     #Calling the update_one function to increment the current image ID value
     image_counter.update_one({}, {"$set": {"count": image_counter.find_one({},{}).get("count") + 1}})
     #Creating the images name and storing it in a variable
-    image_name = "static/img/" + image.filename
+    image_name = "static/img/image" + str(image_counter.find_one({},{}).get("count")) + ".jpg"
     #Calling the update_one function to add the image name to the users profile
     chat_collection.update_one({"id": counter_collection.find_one({},{}).get("count")}, {"$set": {"image": image_name}})
     #Returning the updated image name
     return image_name
+
+
+def get_file(db):
+    counter_collection = db["counter"]
+    chat_collection = db["chat"]
+    return chat_collection.find_one({"id": counter_collection.find_one({},{}).get("count")})
+
 
 #Function to insert a message into DB
 def insert_message(db, body, username):
