@@ -1,4 +1,3 @@
-<!-- Creating head -->
 <html>
 <head>
     <!-- Setting the page title, linking a favicon and style sheet -->
@@ -110,17 +109,17 @@
                 <option value="choice-4">Choice 4</option>
             </select>
             <hr>
-            <label for="formfile">(Optional) Upload an image for your question: </label>
-            <input id="formfile" type="file" name="upload" onchange="console.log(this.value);">
+            <!--<label for="formfile">(Optional) Upload an image for your question: </label>
+            <input id="formfile" type="file" name="upload">-->
             <br/>
             <p class="horizontal_space"></p>
-            <!--<form action="/image" id="image-form" method="post" >
+            <form action="/image" id="image-form" method="post" >
                 <label for="formfile">(Optional) Upload an image for your question: </label>
                 <input id="formfile" type="file" name="upload">
                 <br/>
                 <p class="horizontal_space"></p>
-            </form>-->
-            <button id="chat-button" onclick="sendChat();">Post</button>
+                <button id="chat-button" onclick="sendChat()">Post</button>
+            </form>
         </form>
     </div>
 </div>
