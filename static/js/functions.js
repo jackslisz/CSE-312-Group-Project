@@ -68,10 +68,10 @@ function chatMessageHTML(messageJSON) {
     </div>
     <div>
     
-    <form onsubmit="submitAnswer(${messageId},'${question_}')" method="post">
+    <form onsubmit="submitAnswer(${messageId},'${question_}','${username}')" method="post">
     <label>
         1:
-        <input id="Choice 1" type="radio" name="choices">
+        <input id="Choice 1" type="radio" name="${messageId}">
     </label>
     <label>
         ${choice1}
@@ -79,7 +79,7 @@ function chatMessageHTML(messageJSON) {
     <br>
     <label>
         2:
-        <input id="Choice 2" type="radio" name="choices">
+        <input id="Choice 2" type="radio" name="${messageId}">
     </label>
     <label>
         ${choice2}
@@ -87,7 +87,7 @@ function chatMessageHTML(messageJSON) {
     <br>
     <label>
         3:
-        <input id="Choice 3" type="radio" name="choices">
+        <input id="Choice 3" type="radio" name="${messageId}">
     </label>
     <label>
         ${choice3}
@@ -95,7 +95,7 @@ function chatMessageHTML(messageJSON) {
     <br>
     <label>
         4:
-        <input id="Choice 4" type="radio" name="choices">
+        <input id="Choice 4" type="radio" name="${messageId}">
     </label>
     <label>
         ${choice4}
@@ -122,6 +122,7 @@ function addMessageToChat(messageJSON) {
 }
 
 function addGrade(messageJSON) {
+    console.log(addGrade)
     const chatMessages = document.getElementById("grades-stud");
     chatMessages.innerHTML += "Question "+messageJSON["question"]+"; Answer "+ messageJSON["answer"] + " " +"Correct? "+messageJSON["correctornot"] +"</br>"
     chatMessages.scrollIntoView(false);
@@ -155,6 +156,7 @@ function submitAnswer(param,question_,username_) {
             selected = options[i].id;
         }
     }
+    
     const correct_answer = document.getElementById("right-option");
     const correct_answer_value = correct_answer.options[correct_answer.selectedIndex].text;
     console.log("compfngwku4g check")
