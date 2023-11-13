@@ -43,24 +43,10 @@ function likeMessage(messageId){
     console.log(messageId)
     request.open("POST", "/chat-like");
     request.send(JSON.stringify({"messageId":messageId}));
-    // request.send();
 }
-
-function openFile(file) {
-    var reader = new FileReader();
-    reader.onload = function(){
-      var dataURL = reader.result;
-      var output = document.getElementById('img');
-      output.src = dataURL;
-    };
-    // reader.readAsDataURL(file);
-    console.log(file);
-};
 
 
 function chatMessageHTML(messageJSON) {
-    // console.log(document.getElementById("formfile").files[0]);
-    // console.log(messageJSON);
     const username = messageJSON.username;
     const title = messageJSON.title;
     const likes = messageJSON.likes;
@@ -70,24 +56,13 @@ function chatMessageHTML(messageJSON) {
     const choice2 = messageJSON.choice2;
     const choice3 = messageJSON.choice3;
     const choice4 = messageJSON.choice4;
+    const img = messageJSON.image;
     
-    // const image = null;
-    // const image = 'quizicon.ico';
-    let image = "static/img/quizicon.ico";
-    // if (document.getElementById("formfile").files[0] != undefined) {
-    //     // image = openFile()
-    // }
-    // if (document.getElementById("formfile").files != []) {
-    //     console.log(document.getElementById("formfile").files[0]);
-    //     image = openFile(document.getElementById("formfile").files[0]);
-    //     console.log(image);
-    // }
-    //let messageHTML = `<div class="new_chat_message">`; //why this line?
     let messageHTML =  
     `<div class=new_chat_message>
 	<i class="bi bi-person-fill"></i>
     <span id='message_${messageId}'>${username}<br><br></span>
-    <img src="/static/img/image.jpg" id="img" width="100" height="100"></br>
+    <img src="${img}" id="img" width="100" height="100"></br>
     <font size="+2"><b>${title}</b></font>
     <br>
     <a><b>${description}<b></a>
@@ -132,16 +107,6 @@ function chatMessageHTML(messageJSON) {
     <button onclick="startTimer(${messageId})">Start Timer</button>
     <br>
     </div>`
-
-    // if (document.getElementById("formfile").files[0] != undefined) {
-    //     const image = document.getElementById("formfile").files[0].name;
-    //     messageHTML = messageHTML.replace(`<span id='message_${messageId}'>${username}<br><br></span><img src="/static/img/quizicon.ico"></br></br><font size="+2"><b>${title}</b></font>`,`<span id='message_${messageId}'>${username}<br><br></span><img src="/static/img/${image}"></br></br><font size="+2"><b>${title}</b></font>`);
-    //     console.log(messageHTML);
-    // }
-
-    // THE FOLLOWING 2 LINES WERE REMOVED FROM AFTER LINE 105
-    // <button onclick='deleteMessage(${messageId})'>❌</button>&nbsp;
-	// <button onclick='likeMessage(${messageId})'>💓&nbsp;(${likes})</button><br></br>
     return messageHTML;
 }
 
@@ -276,25 +241,6 @@ function sendChat() {
         title_text_box.focus();
     }
 
-    // request.send(JSON.stringify(messageJSON));
-    // title_text_box.focus();
-
-    //     if (ws) {
-    //     // Using WebSockets
-    //     socket.send(JSON.stringify({'messageType': 'chatMessage', 'message': message}));
-    // } else {
-    //     // Using AJAX
-    //     const request = new XMLHttpRequest();
-    //     request.onreadystatechange = function () {
-    //         if (this.readyState === 4 && this.status === 200) {
-    //             console.log(this.response);
-    //         }
-    //     }
-    //     const messageJSON = {"message": message};
-    //     request.open("POST", "/chat-message");
-    //     request.send(JSON.stringify(messageJSON));
-    // }
-    // chatTextBox.focus();
 }
 
 function updateChat() {
@@ -303,6 +249,7 @@ function updateChat() {
         if (this.readyState === 4 && this.status === 200) {
             // clearChat();
             const messages = JSON.parse(this.response);
+            console.log(messages);
             for (const message of messages) {
                 addMessageToChat(message);
             }

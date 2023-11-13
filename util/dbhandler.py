@@ -6,8 +6,8 @@ from html import *
 #Initialization function for both collections within the DB
 def db_init():
     #Creating variables to reference different layers of MongoDB
+    # mongo_client = MongoClient("mongo")
     mongo_client = MongoClient("localhost")
-    # mongo_client = MongoClient("localhost")
     db = mongo_client["CSE312-Project-One"]
     #Creating collection to reference the chat history
     chat_collection = db["chat"]
@@ -55,7 +55,7 @@ def insert_message_websocket(db, body, username):
 
 #Function to increment the unique image ID value in the image counter collection
 #This function also adds the image name to the user's credentials profile
-def insert_image(db):
+def insert_image(db, image):
     #Re-establishing collections to reference credentials and message/image ID collections
     chat_collection = db["chat"]
     counter_collection = db["counter"]
@@ -63,7 +63,7 @@ def insert_image(db):
     #Calling the update_one function to increment the current image ID value
     image_counter.update_one({}, {"$set": {"count": image_counter.find_one({},{}).get("count") + 1}})
     #Creating the images name and storing it in a variable
-    image_name = "static/img/image" + str(image_counter.find_one({},{}).get("count")) + ".jpg"
+    image_name = "static/img/" + image.filename
     #Calling the update_one function to add the image name to the users profile
     chat_collection.update_one({"id": counter_collection.find_one({},{}).get("count")}, {"$set": {"image": image_name}})
     #Returning the updated image name

@@ -252,8 +252,10 @@ def image():
                 file = request.files["upload"]
                 if file.filename == "":
                     return redirect(url_for('home_page'))
-                image_name = insert_image(db)
+                image_name = insert_image(db, file)
                 file.save(image_name)
+                # insert_image(db, image_name)
+                print(image_name)
     # Obtain the unencrypted password
     # Obtain username
     # username = json_log_data[0].split("=")[1]
