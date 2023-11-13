@@ -1,6 +1,5 @@
 const ws = true;
 let socket = null;
-var file = "static/img/quizicon.ico";
 
 function initWS() {
     // Establish a WebSocket connection with the server
@@ -104,9 +103,6 @@ function chatMessageHTML(messageJSON) {
     </form>
     <br>
     </div>`
-    if (img) {
-        document.getElementById("img").style.visibility = "visible";
-    }
     return messageHTML;
 }
 
@@ -155,8 +151,6 @@ function submitAnswer(event) {
 
 
 function sendChat() {
-    const img = document.getElementById("formfile").files[0].name;
-    console.log(img);
     const title_text_box = document.getElementById("title-text-box");
     const title = title_text_box.value;
     title_text_box.value = "";
