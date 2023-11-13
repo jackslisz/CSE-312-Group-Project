@@ -53,31 +53,25 @@ function chatMessageHTML(messageJSON) {
     const choice2 = messageJSON.choice2;
     const choice3 = messageJSON.choice3;
     const choice4 = messageJSON.choice4;
+    const img = messageJSON.image;
     const question_ = title.toString();
-    // // const image = null;
-    // if(messageJSON.image == B){
-    //     const image = 'quizicon.ico';
-    // }
-    // else{
-    //     const image = messageJSON.image;
-    // }
-    const image = messageJSON.image;
-    // const question_ = title.toString
+
     let messageHTML =  
     `<div class=new_chat_message>
 	<i class="bi bi-person-fill"></i>
     <span id='message_${messageId}'>${username}<br><br></span>
-    <img src="/static/img/${image}"></br></br>
-    <font size="+2"><b>
-    <div id="message_${messageId}_q">${title}</div></b></font>
+    <img src="${img}" id="img" width="100" height="100"></br>
+    <font size="+2"><b>${title}</b></font>
     <br>
     <a><b>${description}<b></a>
     <hr style="border: 1px dotted #ffffff;">
     </div>
     <div>
+    
+    <form onsubmit="submitAnswer(${messageId},'${question_}')" method="post">
     <label>
         1:
-        <input id="Choice 1" type="radio" name="${messageId}">
+        <input id="Choice 1" type="radio" name="choices">
     </label>
     <label>
         ${choice1}
@@ -85,7 +79,7 @@ function chatMessageHTML(messageJSON) {
     <br>
     <label>
         2:
-        <input id="Choice 2" type="radio" name="${messageId}">
+        <input id="Choice 2" type="radio" name="choices">
     </label>
     <label>
         ${choice2}
@@ -93,7 +87,7 @@ function chatMessageHTML(messageJSON) {
     <br>
     <label>
         3:
-        <input id="Choice 3" type="radio" name="${messageId}">
+        <input id="Choice 3" type="radio" name="choices">
     </label>
     <label>
         ${choice3}
@@ -101,27 +95,18 @@ function chatMessageHTML(messageJSON) {
     <br>
     <label>
         4:
-        <input id="Choice 4" type="radio" name="${messageId}">
+        <input id="Choice 4" type="radio" name="choices">
     </label>
     <label>
         ${choice4}
     </label>
     <br>
-    <button id="submit" onclick="submitAnswer(${messageId},'${question_}')">Answer!</button>
+    <input type="submit" value="Submit">
     </form>
     <br>
     </div>`
-    // if (document.getElementById("formfile").files[0] != undefined) {
-    //     const image = document.getElementById("formfile").files[0].name;
-    //     messageHTML = messageHTML.replace(`<hr style=\"border: 1px dotted #ffffff;\">`,`<br><img src=\"static/img/${image}\"></img><hr style=\"border: 1px dotted #ffffff;\">`);
-    //     console.log(messageHTML);
-    // }
-
-    // THE FOLLOWING 2 LINES WERE REMOVED FROM AFTER LINE 105
-    // <button onclick='deleteMessage(${messageId})'>❌</button>&nbsp;
-	// <button onclick='likeMessage(${messageId})'>💓&nbsp;(${likes})</button><br></br>
-
     return messageHTML;
+
 }
 
 function clearChat() {
@@ -154,7 +139,7 @@ function addGradeQuestions(messageJSON) {
 
 // }
 
-function submitAnswer(param,question_) {
+function submitAnswer(param,question_,username_) {
     console.log("submitanswercheck")
     const request = new XMLHttpRequest();
     request.onreadystatechange = function () {
@@ -179,7 +164,7 @@ function submitAnswer(param,question_) {
         console.log("websocketreceptioncheck")
         console.log("message_"+param+"_q")
         question_ = question_.toString()
-        socket.send(JSON.stringify({'messageType': 'questionAnswer',"selected": selected, "correctornot": selected == correct_answer_value, "question":question_}));
+        socket.send(JSON.stringify({'messageType': 'questionAnswer',"selected": selected, "correctornot": selected == correct_answer_value, "question":question_,"username":username_}));
         console.log("postjkeb v")
     }
     else{
@@ -235,7 +220,7 @@ function updateChat() {
     const request = new XMLHttpRequest();
     request.onreadystatechange = function () {
         if (this.readyState === 4 && this.status === 200) {
-            clearChat();
+            // clearChat();
             const messages = JSON.parse(this.response);
             console.log(messages);
             for (const message of messages) {
