@@ -1,5 +1,8 @@
 const ws = true;
 let socket = null;
+let timers = {};
+let timerInterval;
+
 
 function initWS() {
     // Establish a WebSocket connection with the server
@@ -13,7 +16,7 @@ function initWS() {
             addMessageToChat(message);
         } else {
             // send message to WebRTC
-            processMessageAsWebRTC(message, messageType);
+            //processMessageAsWebRTC(message, messageType);
         }
     }
 }
@@ -67,6 +70,7 @@ function chatMessageHTML(messageJSON) {
     const choice2 = messageJSON.choice2;
     const choice3 = messageJSON.choice3;
     const choice4 = messageJSON.choice4;
+    
     // const image = null;
     // const image = 'quizicon.ico';
     let image = "static/img/quizicon.ico";
@@ -78,6 +82,7 @@ function chatMessageHTML(messageJSON) {
     //     image = openFile(document.getElementById("formfile").files[0]);
     //     console.log(image);
     // }
+    //let messageHTML = `<div class="new_chat_message">`; //why this line?
     let messageHTML =  
     `<div class=new_chat_message>
 	<i class="bi bi-person-fill"></i>
@@ -88,8 +93,8 @@ function chatMessageHTML(messageJSON) {
     <a><b>${description}<b></a>
     <hr style="border: 1px dotted #ffffff;">
     </div>
-    <div>
-    <form onsubmit="submitAnswer(event)" method="post">
+    <div id="timer_${messageId}"></div>
+    <form onsubmit="submitAnswer(event, ${messageId})" method="post">
     <label>
         1:
         <input id="Choice 1" type="radio" name="choices">
@@ -122,10 +127,12 @@ function chatMessageHTML(messageJSON) {
         ${choice4}
     </label>
     <br>
-    <input type="submit" value="Submit">
+    <input type="submit" id="submit_${messageId}" value="Submit">
     </form>
+    <button onclick="startTimer(${messageId})">Start Timer</button>
     <br>
     </div>`
+
     // if (document.getElementById("formfile").files[0] != undefined) {
     //     const image = document.getElementById("formfile").files[0].name;
     //     messageHTML = messageHTML.replace(`<span id='message_${messageId}'>${username}<br><br></span><img src="/static/img/quizicon.ico"></br></br><font size="+2"><b>${title}</b></font>`,`<span id='message_${messageId}'>${username}<br><br></span><img src="/static/img/${image}"></br></br><font size="+2"><b>${title}</b></font>`);
@@ -135,7 +142,6 @@ function chatMessageHTML(messageJSON) {
     // THE FOLLOWING 2 LINES WERE REMOVED FROM AFTER LINE 105
     // <button onclick='deleteMessage(${messageId})'>❌</button>&nbsp;
 	// <button onclick='likeMessage(${messageId})'>💓&nbsp;(${likes})</button><br></br>
-
     return messageHTML;
 }
 
@@ -151,6 +157,55 @@ function addMessageToChat(messageJSON) {
     chatMessages.scrollTop = chatMessages.scrollHeight - chatMessages.clientHeight;
 }
 
+function startTimer(messageId) {
+    timers[messageId] = {
+      timeRemaining: 60,
+      interval: setInterval(function () {
+        if (timers[messageId].timeRemaining > 0) {
+          timers[messageId].timeRemaining--;
+          updateTimerDisplay(messageId);
+        } else {
+          disableSubmitButton(messageId);
+          clearInterval(timers[messageId].interval);
+        }
+      }, 1000),
+    };
+  
+    updateTimerDisplay(messageId);
+  }
+  
+  function updateTimerDisplay(messageId) {
+    const timerElement = document.getElementById(`timer_${messageId}`);
+    if (timerElement) {
+      if (timers[messageId].timeRemaining > 0) {
+        timerElement.innerHTML = `Time remaining: ${timers[messageId].timeRemaining} seconds`;
+      } else {
+        timerElement.innerHTML = "Time's Up!";
+      }
+    }
+  }
+  
+  function disableSubmitButton(messageId) {
+    const submitButton = document.querySelector(`#submit_${messageId}`);
+    if (submitButton) {
+      submitButton.disabled = true;
+    }
+  }
+  
+  function resetTimer(messageId) {
+    timers[messageId].timeRemaining = 60;
+    clearInterval(timers[messageId].interval);
+    enableSubmitButton(messageId);
+    updateTimerDisplay(messageId);
+  }
+  
+  function enableSubmitButton(messageId) {
+    const submitButton = document.querySelector(`#submit_${messageId}`);
+    if (submitButton) {
+      submitButton.disabled = false;
+    }
+  }
+
 function submitAnswer(event) {
     event.preventDefault();
     console.log("submitanswercheck")
@@ -160,7 +215,7 @@ function submitAnswer(event) {
             console.log(this.response);
         }
     }
-    var options = document.getElementsByName('choice');
+    var options = document.getElementsByName('choices');
     var selected;
     for(var i = 0; i < options.length; i++){
         if(options[i].checked){
