@@ -55,6 +55,7 @@ function chatMessageHTML(messageJSON) {
     const choice3 = messageJSON.choice3;
     const choice4 = messageJSON.choice4;
     const img = messageJSON.image;
+    
     let messageHTML =  
     `<div class=new_chat_message>
 	<i class="bi bi-person-fill"></i>
@@ -103,7 +104,9 @@ function chatMessageHTML(messageJSON) {
     </form>
     <br>
     </div>`
-
+    if (img) {
+        document.getElementById("img").style.visibility = "visible";
+    }
     return messageHTML;
 }
 
@@ -181,10 +184,10 @@ function sendChat() {
             console.log(this.response);
         }
     }
-    const messageJSON = {"title": title, "description": description, "choice1": choice1, "choice2": choice2, "choice3": choice3, "choice4": choice4, "correctanswer": correct_answer_value, "img": "static/img/" + img};
+    const messageJSON = {"title": title, "description": description, "choice1": choice1, "choice2": choice2, "choice3": choice3, "choice4": choice4, "correctanswer": correct_answer_value};
     request.open("POST", "/chat-message");
     if(ws){
-        socket.send(JSON.stringify({'messageType': 'chatMessage',"title": title, "description": description,"choice1": choice1, "choice2": choice2, "choice3": choice3, "choice4": choice4, "correctanswer": correct_answer_value, "img": "static/img/" + img}));
+        socket.send(JSON.stringify({'messageType': 'chatMessage',"title": title, "description": description,"choice1": choice1, "choice2": choice2, "choice3": choice3, "choice4": choice4, "correctanswer": correct_answer_value}));
     }
     else{
         request.send(JSON.stringify(messageJSON));
