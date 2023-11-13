@@ -57,7 +57,8 @@ function chatMessageHTML(messageJSON) {
     const choice3 = messageJSON.choice3;
     const choice4 = messageJSON.choice4;
     const img = messageJSON.image;
-    
+    const question_ = title.toString();
+
     let messageHTML =  
     `<div class=new_chat_message>
 	<i class="bi bi-person-fill"></i>
@@ -69,10 +70,12 @@ function chatMessageHTML(messageJSON) {
     <hr style="border: 1px dotted #ffffff;">
     </div>
     <div id="timer_${messageId}"></div>
-    <form onsubmit="submitAnswer(event, ${messageId})" method="post">
+    <form onsubmit="submitAnswer(event, ${messageId},'${question_}','${username}')" method="post">
+    <div>
+    
     <label>
         1:
-        <input id="Choice 1" type="radio" name="choices">
+        <input id="Choice 1" type="radio" name="${messageId}">
     </label>
     <label>
         ${choice1}
@@ -80,7 +83,7 @@ function chatMessageHTML(messageJSON) {
     <br>
     <label>
         2:
-        <input id="Choice 2" type="radio" name="choices">
+        <input id="Choice 2" type="radio" name="${messageId}">
     </label>
     <label>
         ${choice2}
@@ -88,7 +91,7 @@ function chatMessageHTML(messageJSON) {
     <br>
     <label>
         3:
-        <input id="Choice 3" type="radio" name="choices">
+        <input id="Choice 3" type="radio" name="${messageId}">
     </label>
     <label>
         ${choice3}
@@ -96,7 +99,7 @@ function chatMessageHTML(messageJSON) {
     <br>
     <label>
         4:
-        <input id="Choice 4" type="radio" name="choices">
+        <input id="Choice 4" type="radio" name="${messageId}">
     </label>
     <label>
         ${choice4}
@@ -108,6 +111,7 @@ function chatMessageHTML(messageJSON) {
     <br>
     </div>`
     return messageHTML;
+
 }
 
 function clearChat() {
@@ -171,7 +175,26 @@ function startTimer(messageId) {
     }
   }
 
-function submitAnswer(event) {
+
+function addGrade(messageJSON) {
+    console.log(addGrade)
+    const chatMessages = document.getElementById("grades-stud");
+    chatMessages.innerHTML += "Question "+messageJSON["question"]+"; Answer "+ messageJSON["answer"] + " " +"Correct? "+messageJSON["correctornot"] +"</br>"
+    chatMessages.scrollIntoView(false);
+    chatMessages.scrollTop = chatMessages.scrollHeight - chatMessages.clientHeight;
+}
+function addGradeQuestions(messageJSON) {
+    const chatMessages = document.getElementById("grades-all");
+    chatMessages.innerHTML += "Question "+messageJSON["title"]+"; Answer "+ messageJSON["correctanswer"] + "</br>" 
+    chatMessages.scrollIntoView(false);
+    chatMessages.scrollTop = chatMessages.scrollHeight - chatMessages.clientHeight;
+}
+
+
+// function parsePic(){
+
+// }
+function submitAnswer(event, param,question_,username_) {
     event.preventDefault();
     console.log("submitanswercheck")
     const request = new XMLHttpRequest();
@@ -180,20 +203,25 @@ function submitAnswer(event) {
             console.log(this.response);
         }
     }
-    var options = document.getElementsByName('choices');
+    var options = Array.from(document.getElementsByName(param));
+    console.log(options);
     var selected;
     for(var i = 0; i < options.length; i++){
         if(options[i].checked){
-            selected = options[i].value;
+            selected = options[i].id;
         }
     }
+    
     const correct_answer = document.getElementById("right-option");
     const correct_answer_value = correct_answer.options[correct_answer.selectedIndex].text;
     console.log("compfngwku4g check")
+    console.log(selected)
     const messageJSON = {"selected": selected, "correctornot": selected == correct_answer_value};
     if(ws){
         console.log("websocketreceptioncheck")
-        socket.send(JSON.stringify({'messageType': 'questionAnswer',"selected": selected, "correctornot": selected == correct_answer_value}));
+        console.log("message_"+param+"_q")
+        question_ = question_.toString()
+        socket.send(JSON.stringify({'messageType': 'questionAnswer',"selected": selected, "correctornot": selected == correct_answer_value, "question":question_,"username":username_}));
         console.log("postjkeb v")
     }
     else{
@@ -233,8 +261,10 @@ function sendChat() {
     }
     const messageJSON = {"title": title, "description": description, "choice1": choice1, "choice2": choice2, "choice3": choice3, "choice4": choice4, "correctanswer": correct_answer_value};
     request.open("POST", "/chat-message");
+    // console.log()
     if(ws){
         socket.send(JSON.stringify({'messageType': 'chatMessage',"title": title, "description": description,"choice1": choice1, "choice2": choice2, "choice3": choice3, "choice4": choice4, "correctanswer": correct_answer_value}));
+        // time()
     }
     else{
         request.send(JSON.stringify(messageJSON));
@@ -259,6 +289,65 @@ function updateChat() {
     request.send();
 }
 
+function seeGrade(){
+    console.log("hllo")
+    const request = new XMLHttpRequest();
+    request.onreadystatechange = function () {
+        if (this.readyState === 4 && this.status === 200) {
+            // clearChat();
+            const messages = JSON.parse(this.response);
+            console.log(messages);
+            for (const message of messages) {
+                addGrade(message);
+            }
+        }
+    }
+    request.open("GET", "/see-grade");
+    request.send();
+
+}
+
+
+function seeGradeStudent(){
+    console.log("hello")
+    const request = new XMLHttpRequest();
+    request.onreadystatechange = function () {
+        if (this.readyState === 4 && this.status === 200) {
+            // clearChat();
+            const messages = JSON.parse(this.response);
+            console.log(messages);
+            for (const message of messages) {
+                addGradeQuestions(message);
+            }
+        }
+    }
+    request.open("GET", "/see-grade-questions");
+    request.send();
+    // chatMessages.innerHTML += chatMessageHTML(messageJSON);
+    // chatMessages.scrollIntoView(false);
+    // chatMessages.scrollTop = chatMessages.scrollHeight - chatMessages.clientHeight;
+}
+
+function welcome2() {
+
+
+    const request = new XMLHttpRequest();
+    request.onreadystatechange = function () {
+        console.log(this.response)
+        if (this.readyState === 4 && this.status === 200) {
+            // clearChat();
+            const messages = JSON.parse(this.response);
+            for (const message of messages) {
+                addMessageToChat(message);
+            }
+        }
+    }
+    request.open("GET", "/grade");
+    request.send();
+
+
+}
+
 function welcome() {
     document.addEventListener("keypress", function (event) {
         if (event.code === "Enter") {
@@ -270,6 +359,8 @@ function welcome() {
     document.getElementById("chat-messages").focus();
 
     updateChat();
+    seeGrade();
+    seeGradeStudent();
 
     if (ws) {
         initWS();

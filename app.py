@@ -9,6 +9,7 @@ from html import escape
 #Importing functions from dbhandler.py
 from util.dbhandler import *
 # from uswgi import *
+from bson import json_util
 from flask_sock import Sock
 
 #Creating Flask app instance and storing it in app
@@ -60,9 +61,8 @@ def echo(ws):
         # print(data)
         data = loads(data)
         print(data)
-        #Retrieving the authentication token from browser
         auth_token_from_browser = request.cookies.get('auth_token', None)
-        #Checking if the user has an auth token present
+    #Checking if the user has an auth token present
         if auth_token_from_browser is not None:
             #Hashing the token by calling the SHA256 function
             encrypt_auth_token = sha256(auth_token_from_browser.encode()).digest()
@@ -81,15 +81,33 @@ def echo(ws):
                     data["choice3"] = escape(data["choice3"])
                     data["choice4"] = escape(data["choice4"])
                     data["correctanswer"] = escape(data["correctanswer"])
-                    insert_message_websocket(db, data, get_auth_tokens(db, encrypt_auth_token)["username"])
+                    id_ = insert_message_websocket(db, data, get_auth_tokens(db, encrypt_auth_token)["username"])
+                    print(id_)
                     data.update({"username" : get_auth_tokens(db, encrypt_auth_token)["username"]})
+                    data.update({"id":id_})
+                    # get_data = get_file(db)
+                    # if(get_data["image"]!=None):
+                    #     data.update({"image":get_data["image"]})
+                    # else:
+                    #     data.update({"image":"quizicon.ico"})
+                        
+
+
+
+                    # data.update({"id" : get_auth_tokens(db, encrypt_auth_token)["username"]})
                     # print(data)
                 #Checking if the incoming request is an answer to a question
                 elif data["messageType"] == "questionAnswer":
-                    pass
-                data = dumps(data)
-                ws.send(data)
+                    # if(data["correctornot"] == True):
+                    answer(db,data,data["correctornot"],get_auth_tokens(db, encrypt_auth_token)["username"])
+                    # else:
 
+                    #"selected": selected, "correctornot": selected == correct_answer_value}));
+                # mute
+                    # data["selected":selected]
+                data = dumps(data)
+                print("sending",data)
+                ws.send(data)
 #Decorator to turn Python function style_page into Flask view function
 @app.route('/static/css/<path:file_path>')
 def style_page(file_path):
@@ -137,6 +155,64 @@ def visit_counter_cookie():
     response.set_cookie('visit_counter', str(int(visit_count) + 1), max_age=3600) 
     #Returning the finished response
     return response
+
+
+@app.route('/see-grade', methods=["GET", "POST"])
+def grade():
+    auth_token_from_browser = request.cookies.get('auth_token', None)
+    #Checking if the user has an auth token present
+    if auth_token_from_browser is not None:
+        #If so, hashing the token by calling the SHA256 function
+        encrypt_auth_token = sha256(auth_token_from_browser.encode()).digest()
+        #Checking whether the DB contains that auth token, if not setting db_result to hold an empty dictionary
+        db_result = get_auth_tokens(db, encrypt_auth_token) if get_auth_tokens(db, encrypt_auth_token) != None else {}
+        #If so, calling render_template to look for and open the file index.html
+        #Calling make_response to make a flask response to edit headers and MIME types
+        usernm = get_grades(db, get_auth_tokens(db, encrypt_auth_token)["username"])
+        users = []
+        for m in usernm:
+            users.append(m)
+        # response = make_response(render_template('bo.html', username=users))
+    # #Otherwise, replacing the template with the username "Guest"
+    # else:
+    #     response = make_response(render_template('index_template.html', username='Guest'))
+    # #Setting the nosniff header
+    # response.headers['X-Content-Type-Options'] = 'nosniff'
+    # #Setting the correct MIME type for HTML
+    # response.headers['Content-Type'] = 'text/html; charset=utf-8'    
+    #Returning the finished response
+    print(json_util.dumps(users))
+
+    return json_util.dumps(users).encode()
+
+@app.route('/see-grade-questions', methods=["GET", "POST"])
+def grade_get():
+    auth_token_from_browser = request.cookies.get('auth_token', None)
+    #Checking if the user has an auth token present
+    if auth_token_from_browser is not None:
+        #If so, hashing the token by calling the SHA256 function
+        encrypt_auth_token = sha256(auth_token_from_browser.encode()).digest()
+        #Checking whether the DB contains that auth token, if not setting db_result to hold an empty dictionary
+        db_result = get_auth_tokens(db, encrypt_auth_token) if get_auth_tokens(db, encrypt_auth_token) != None else {}
+        #If so, calling render_template to look for and open the file index.html
+        #Calling make_response to make a flask response to edit headers and MIME types
+        usernm = get_chat_history_particular_username(db, get_auth_tokens(db, encrypt_auth_token)["username"])
+        users = []
+        for m in usernm:
+            users.append(m)
+        # response = make_response(render_template('bo.html', username=users))
+    # #Otherwise, replacing the template with the username "Guest"
+    # else:
+    #     response = make_response(render_template('index_template.html', username='Guest'))
+    # #Setting the nosniff header
+    # response.headers['X-Content-Type-Options'] = 'nosniff'
+    # #Setting the correct MIME type for HTML
+    # response.headers['Content-Type'] = 'text/html; charset=utf-8'    
+    #Returning the finished response
+    print(json_util.dumps(users))
+
+    return json_util.dumps(users).encode()
+
 
 #Decorator to turn Python function chat_message into Flask view function
 @app.route('/chat-message', methods=["POST"])
@@ -254,8 +330,7 @@ def image():
                     return redirect(url_for('home_page'))
                 image_name = insert_image(db, file)
                 file.save(image_name)
-                # insert_image(db, image_name)
-                print(image_name)
+    
     # Obtain the unencrypted password
     # Obtain username
     # username = json_log_data[0].split("=")[1]
