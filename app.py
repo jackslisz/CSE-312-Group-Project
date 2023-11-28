@@ -12,23 +12,16 @@ from util.dbhandler import *
 from bson import json_util
 from flask_sock import Sock
 
+# TODO : 
+# Fix Timer
+
 #Creating Flask app instance and storing it in app
 #__name__ holds the name of current Python module
 app = Flask(__name__, static_url_path="/static")
 #Initializing the Database (DB)
 db = db_init()
-
 #Decorators to turn Python function home_page into Flask view function
-
 sock = Sock(app)
-
-# @app.route("/websocket")
-# def application(env, start_response):
-#     # complete the handshake
-#     uwsgi.websocket_handshake(env['HTTP_SEC_WEBSOCKET_KEY'], env.get('HTTP_ORIGIN', ''))
-#     while True:
-#         msg = uwsgi.websocket_recv()
-#         uwsgi.websocket_send(msg)
 
 @app.route("/")
 @app.route("/home", methods=["GET", "POST"])
@@ -90,10 +83,6 @@ def echo(ws):
                     #     data.update({"image":get_data["image"]})
                     # else:
                     #     data.update({"image":"quizicon.ico"})
-                        
-
-
-
                     # data.update({"id" : get_auth_tokens(db, encrypt_auth_token)["username"]})
                     # print(data)
                 #Checking if the incoming request is an answer to a question
@@ -108,6 +97,7 @@ def echo(ws):
                 data = dumps(data)
                 print("sending",data)
                 ws.send(data)
+
 #Decorator to turn Python function style_page into Flask view function
 @app.route('/static/css/<path:file_path>')
 def style_page(file_path):
@@ -135,8 +125,9 @@ def script_page(file_path):
 #Decorator to turn Python function image_page into Flask view function
 @app.route('/static/img/<path:file_path>')
 def image_page(file_path):
+    new_file_path = file_path.replace("/", "")
     #Calling send_from_directory to edit nosniff header of non-HTML files
-    response = send_from_directory('static/img/', file_path)
+    response = send_from_directory('static/img/', new_file_path)
     #Setting the nosniff header
     response.headers['X-Content-Type-Options'] = 'nosniff' 
     #Setting the correct MIME type for PNG images
@@ -155,7 +146,6 @@ def visit_counter_cookie():
     response.set_cookie('visit_counter', str(int(visit_count) + 1), max_age=3600) 
     #Returning the finished response
     return response
-
 
 @app.route('/see-grade', methods=["GET", "POST"])
 def grade():
@@ -182,7 +172,6 @@ def grade():
     # response.headers['Content-Type'] = 'text/html; charset=utf-8'    
     #Returning the finished response
     print(json_util.dumps(users))
-
     return json_util.dumps(users).encode()
 
 @app.route('/see-grade-questions', methods=["GET", "POST"])
@@ -210,9 +199,7 @@ def grade_get():
     # response.headers['Content-Type'] = 'text/html; charset=utf-8'    
     #Returning the finished response
     print(json_util.dumps(users))
-
     return json_util.dumps(users).encode()
-
 
 #Decorator to turn Python function chat_message into Flask view function
 @app.route('/chat-message', methods=["POST"])
@@ -266,7 +253,6 @@ def chat_history():
 def register_user():
     #Retrieving the entire body of the request by calling get_data()
     creds = request.get_data().decode()
-    # print(creds)
     #Splitting the body to store the username (0) and password (1) inside creds
     creds = creds.split('&', 1)
     #Removing key from username/password to leave just the username/password
@@ -310,7 +296,6 @@ def login_page():
         response = abort(401)
     #Returning the Flask response
     return response
-
 
 #Decorator to turn Python function login_page into Flask view function
 @app.route("/image", methods=["POST"])
@@ -365,7 +350,6 @@ def submit_answer():
         #Checking whether the DB contains that auth token 
         if(get_auth_tokens(db, encrypt_auth_token)):
             pass
-
 
     return redirect(url_for('home_page'))
 

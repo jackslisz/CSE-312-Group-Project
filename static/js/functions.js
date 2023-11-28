@@ -127,54 +127,53 @@ function addMessageToChat(messageJSON) {
 }
 
 function startTimer(messageId) {
-    timers[messageId] = {
-      timeRemaining: 60,
-      interval: setInterval(function () {
-        if (timers[messageId].timeRemaining > 0) {
-          timers[messageId].timeRemaining--;
-          updateTimerDisplay(messageId);
-        } else {
-          disableSubmitButton(messageId);
-          clearInterval(timers[messageId].interval);
-        }
-      }, 1000),
+        timers[messageId] = {
+        timeRemaining: 60,
+        interval: setInterval(function () {
+            if (timers[messageId].timeRemaining > 0) {
+                timers[messageId].timeRemaining--;
+                updateTimerDisplay(messageId);
+            } else {
+                disableSubmitButton(messageId);
+                clearInterval(timers[messageId].interval);
+            }
+        }, 1000),
     };
-  
+
     updateTimerDisplay(messageId);
-  }
-  
-  function updateTimerDisplay(messageId) {
+}
+
+function updateTimerDisplay(messageId) {
     const timerElement = document.getElementById(`timer_${messageId}`);
     if (timerElement) {
-      if (timers[messageId].timeRemaining > 0) {
-        timerElement.innerHTML = `Time remaining: ${timers[messageId].timeRemaining} seconds`;
-      } else {
-        timerElement.innerHTML = "Time's Up!";
-      }
+        if (timers[messageId].timeRemaining > 0) {
+            timerElement.innerHTML = `Time remaining: ${timers[messageId].timeRemaining} seconds`;
+        } else {
+            timerElement.innerHTML = "Time's Up!";
+        }
     }
-  }
-  
-  function disableSubmitButton(messageId) {
+}
+
+function disableSubmitButton(messageId) {
     const submitButton = document.querySelector(`#submit_${messageId}`);
     if (submitButton) {
-      submitButton.disabled = true;
+        submitButton.disabled = true;
     }
-  }
-  
-  function resetTimer(messageId) {
+}
+
+function resetTimer(messageId) {
     timers[messageId].timeRemaining = 60;
     clearInterval(timers[messageId].interval);
     enableSubmitButton(messageId);
     updateTimerDisplay(messageId);
-  }
-  
-  function enableSubmitButton(messageId) {
+}
+
+function enableSubmitButton(messageId) {
     const submitButton = document.querySelector(`#submit_${messageId}`);
     if (submitButton) {
-      submitButton.disabled = false;
+        submitButton.disabled = false;
     }
-  }
-
+}
 
 function addGrade(messageJSON) {
     console.log(addGrade)
@@ -183,6 +182,7 @@ function addGrade(messageJSON) {
     chatMessages.scrollIntoView(false);
     chatMessages.scrollTop = chatMessages.scrollHeight - chatMessages.clientHeight;
 }
+
 function addGradeQuestions(messageJSON) {
     const chatMessages = document.getElementById("grades-all");
     chatMessages.innerHTML += "Question "+messageJSON["title"]+"; Answer "+ messageJSON["correctanswer"] + "</br>" 
@@ -190,10 +190,6 @@ function addGradeQuestions(messageJSON) {
     chatMessages.scrollTop = chatMessages.scrollHeight - chatMessages.clientHeight;
 }
 
-
-// function parsePic(){
-
-// }
 function submitAnswer(event, param,question_,username_) {
     event.preventDefault();
     console.log("submitanswercheck")
@@ -229,7 +225,6 @@ function submitAnswer(event, param,question_,username_) {
         request.send(JSON.stringify(messageJSON));
     }
 }
-
 
 function sendChat() {
     const title_text_box = document.getElementById("title-text-box");
@@ -290,7 +285,7 @@ function updateChat() {
 }
 
 function seeGrade(){
-    console.log("hllo")
+    console.log("hello")
     const request = new XMLHttpRequest();
     request.onreadystatechange = function () {
         if (this.readyState === 4 && this.status === 200) {
@@ -304,9 +299,7 @@ function seeGrade(){
     }
     request.open("GET", "/see-grade");
     request.send();
-
 }
-
 
 function seeGradeStudent(){
     console.log("hello")
@@ -329,8 +322,6 @@ function seeGradeStudent(){
 }
 
 function welcome2() {
-
-
     const request = new XMLHttpRequest();
     request.onreadystatechange = function () {
         console.log(this.response)
@@ -344,8 +335,6 @@ function welcome2() {
     }
     request.open("GET", "/grade");
     request.send();
-
-
 }
 
 function welcome() {
@@ -370,5 +359,4 @@ function welcome() {
         videoElem.parentElement.removeChild(videoElem);
         setInterval(updateChat, 2000);
     }
-
 }
