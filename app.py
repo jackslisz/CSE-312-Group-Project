@@ -53,7 +53,7 @@ def echo(ws):
         data = ws.receive()
         # print(data)
         data = loads(data)
-        print(data)
+        # print(data)
         auth_token_from_browser = request.cookies.get('auth_token', None)
     #Checking if the user has an auth token present
         if auth_token_from_browser is not None:
@@ -75,7 +75,7 @@ def echo(ws):
                     data["choice4"] = escape(data["choice4"])
                     data["correctanswer"] = escape(data["correctanswer"])
                     id_ = insert_message_websocket(db, data, get_auth_tokens(db, encrypt_auth_token)["username"])
-                    print(id_)
+                    # print(id_)
                     data.update({"username" : get_auth_tokens(db, encrypt_auth_token)["username"]})
                     data.update({"id":id_})
                     # get_data = get_file(db)
@@ -95,7 +95,7 @@ def echo(ws):
                 # mute
                     # data["selected":selected]
                 data = dumps(data)
-                print("sending",data)
+                # print("sending",data)
                 ws.send(data)
 
 #Decorator to turn Python function style_page into Flask view function
@@ -125,6 +125,7 @@ def script_page(file_path):
 #Decorator to turn Python function image_page into Flask view function
 @app.route('/static/img/<path:file_path>')
 def image_page(file_path):
+    #Removing any slashes to avoid users requesting server files
     new_file_path = file_path.replace("/", "")
     #Calling send_from_directory to edit nosniff header of non-HTML files
     response = send_from_directory('static/img/', new_file_path)
@@ -171,7 +172,7 @@ def grade():
     # #Setting the correct MIME type for HTML
     # response.headers['Content-Type'] = 'text/html; charset=utf-8'    
     #Returning the finished response
-    print(json_util.dumps(users))
+    # print(json_util.dumps(users))
     return json_util.dumps(users).encode()
 
 @app.route('/see-grade-questions', methods=["GET", "POST"])
@@ -198,7 +199,7 @@ def grade_get():
     # #Setting the correct MIME type for HTML
     # response.headers['Content-Type'] = 'text/html; charset=utf-8'    
     #Returning the finished response
-    print(json_util.dumps(users))
+    # print(json_util.dumps(users))
     return json_util.dumps(users).encode()
 
 #Decorator to turn Python function chat_message into Flask view function

@@ -53,7 +53,7 @@ def update_id(db):
 def answer(db,ans,correct,usrn):
     chat_collection = db["chat"]
     answer_collection = db["ans"]
-    answer_collection.insert_one({"question":ans["question"],"answer":ans["selected"],"correctornot":ans["correctornot"], "username":usrn})
+    answer_collection.insert_one({"question":escape(ans["question"]),"answer":ans["selected"],"correctornot":ans["correctornot"], "username":usrn})
 
 def get_grades(db,username):
     answer_collection = db["ans"]
