@@ -1,6 +1,13 @@
 #Taken from lecture:
 version: '3.3'
 services:
+  #Adding nginx to the compose file
+  nginx:
+    build: ./nginx
+    #Mapping the correct ports for the container
+    ports:
+      - '80:80'
+      - '443:443'
   #Adding MongoDB to the compose file
   mongo:
     image: mongo:7.0.1

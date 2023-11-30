@@ -13,7 +13,8 @@ from bson import json_util
 from flask_sock import Sock
 
 # TODO : 
-# Fix Timer
+# FIX WEBSOCKETS NOT SENDING TO ALL CONNECTIONS
+# FIX TIMER
 
 #Creating Flask app instance and storing it in app
 #__name__ holds the name of current Python module
@@ -22,6 +23,9 @@ app = Flask(__name__, static_url_path="/static")
 db = db_init()
 #Decorators to turn Python function home_page into Flask view function
 sock = Sock(app)
+#Creating a global variable to hold the set of all WS connections
+global ws_set
+ws_set = set()
 
 @app.route("/")
 @app.route("/home", methods=["GET", "POST"])
@@ -49,8 +53,26 @@ def home_page():
 
 @sock.route('/websocket')
 def echo(ws):
+    global ws_set
+    #Adding the current WS connection to the set of connections
+    print(ws)
+    ws_set.add(ws)
+    print(ws_set)
+    data = b''
     while True:
-        data = ws.receive()
+        leave_loop = False
+        try:
+            data = ws.receive()
+        except:
+            #if the connection was terminated, remove them from teh set and break
+            leave_loop = True
+        if data == b'': 
+            leave_loop = True
+        if leave_loop:
+            ws_set.remove(ws)
+            break
+        print("\n\n\n\n\nHERE:")
+        print(data)
         # print(data)
         data = loads(data)
         # print(data)
@@ -96,7 +118,16 @@ def echo(ws):
                     # data["selected":selected]
                 data = dumps(data)
                 # print("sending",data)
-                ws.send(data)
+                #Sending the WS response using send for each socket connection
+                send_to_all(data)
+
+def send_to_all(data):
+    global ws_set
+    print(f'There are {len(ws_set)} connections: they are: {ws_set}')
+    for socket in ws_set:
+        if not socket.close:
+            socket.send(data)
+            print(f"Data sent to: {socket}")
 
 #Decorator to turn Python function style_page into Flask view function
 @app.route('/static/css/<path:file_path>')
@@ -156,13 +187,16 @@ def grade():
         #If so, hashing the token by calling the SHA256 function
         encrypt_auth_token = sha256(auth_token_from_browser.encode()).digest()
         #Checking whether the DB contains that auth token, if not setting db_result to hold an empty dictionary
-        db_result = get_auth_tokens(db, encrypt_auth_token) if get_auth_tokens(db, encrypt_auth_token) != None else {}
-        #If so, calling render_template to look for and open the file index.html
-        #Calling make_response to make a flask response to edit headers and MIME types
-        usernm = get_grades(db, get_auth_tokens(db, encrypt_auth_token)["username"])
-        users = []
-        for m in usernm:
-            users.append(m)
+        # db_result = get_auth_tokens(db, encrypt_auth_token) if get_auth_tokens(db, encrypt_auth_token) != None else {}
+        db_result = get_auth_tokens(db, encrypt_auth_token) 
+        if get_auth_tokens(db, encrypt_auth_token) != None:
+            #If so, calling render_template to look for and open the file index.html
+            #Calling make_response to make a flask response to edit headers and MIME types
+            usernm = get_grades(db, get_auth_tokens(db, encrypt_auth_token)["username"])
+            users = []
+            for m in usernm:
+                users.append(m)
+            return json_util.dumps(users).encode()
         # response = make_response(render_template('bo.html', username=users))
     # #Otherwise, replacing the template with the username "Guest"
     # else:
@@ -173,7 +207,7 @@ def grade():
     # response.headers['Content-Type'] = 'text/html; charset=utf-8'    
     #Returning the finished response
     # print(json_util.dumps(users))
-    return json_util.dumps(users).encode()
+    return abort(401)
 
 @app.route('/see-grade-questions', methods=["GET", "POST"])
 def grade_get():
@@ -183,13 +217,16 @@ def grade_get():
         #If so, hashing the token by calling the SHA256 function
         encrypt_auth_token = sha256(auth_token_from_browser.encode()).digest()
         #Checking whether the DB contains that auth token, if not setting db_result to hold an empty dictionary
-        db_result = get_auth_tokens(db, encrypt_auth_token) if get_auth_tokens(db, encrypt_auth_token) != None else {}
-        #If so, calling render_template to look for and open the file index.html
-        #Calling make_response to make a flask response to edit headers and MIME types
-        usernm = get_chat_history_particular_username(db, get_auth_tokens(db, encrypt_auth_token)["username"])
-        users = []
-        for m in usernm:
-            users.append(m)
+        # db_result = get_auth_tokens(db, encrypt_auth_token) if get_auth_tokens(db, encrypt_auth_token) != None else {}
+        db_result = get_auth_tokens(db, encrypt_auth_token) 
+        if get_auth_tokens(db, encrypt_auth_token) != None:
+            #If so, calling render_template to look for and open the file index.html
+            #Calling make_response to make a flask response to edit headers and MIME types
+            usernm = get_chat_history_particular_username(db, get_auth_tokens(db, encrypt_auth_token)["username"])
+            users = []
+            for m in usernm:
+                users.append(m)
+            return json_util.dumps(users).encode()
         # response = make_response(render_template('bo.html', username=users))
     # #Otherwise, replacing the template with the username "Guest"
     # else:
@@ -200,7 +237,7 @@ def grade_get():
     # response.headers['Content-Type'] = 'text/html; charset=utf-8'    
     #Returning the finished response
     # print(json_util.dumps(users))
-    return json_util.dumps(users).encode()
+    return abort(401)
 
 #Decorator to turn Python function chat_message into Flask view function
 @app.route('/chat-message', methods=["POST"])
