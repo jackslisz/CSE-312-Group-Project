@@ -10,7 +10,8 @@ from html import escape
 from util.dbhandler import *
 # from uswgi import *
 from bson import json_util
-from flask_sock import Sock
+# from flask_sock import Sock
+from flask_socketio import *
 
 # TODO : 
 # FIX WEBSOCKETS NOT SENDING TO ALL CONNECTIONS
@@ -22,7 +23,9 @@ app = Flask(__name__, static_url_path="/static")
 #Initializing the Database (DB)
 db = db_init()
 #Decorators to turn Python function home_page into Flask view function
-sock = Sock(app)
+# sock = Sock(app)
+app.config['SECRET_KEY'] = 'secret!'
+socketio = SocketIO(app, logger=True, engineio_logger=True)
 #Creating a global variable to hold the set of all WS connections
 global ws_set
 ws_set = set()
@@ -51,33 +54,36 @@ def home_page():
     #Returning the finished response
     return response
 
-@sock.route('/websocket')
-def echo(ws):
-    global ws_set
-    #Adding the current WS connection to the set of connections
-    print(ws)
-    ws_set.add(ws)
-    print(ws_set)
-    data = b''
+# @sock.route('/websocket')
+# def echo(ws):
+@socketio.on('websocket_message')
+def handle_message(json):
+    # global ws_set
+    # #Adding the current WS connection to the set of connections
+    # print(ws)
+    # ws_set.add(ws)
+    # print(ws_set)
+    # data = b''
     while True:
-        leave_loop = False
-        try:
-            data = ws.receive()
-        except:
-            #if the connection was terminated, remove them from teh set and break
-            leave_loop = True
-        if data == b'': 
-            leave_loop = True
-        if leave_loop:
-            ws_set.remove(ws)
-            break
-        print("\n\n\n\n\nHERE:")
-        print(data)
+    #     leave_loop = False
+    #     try:
+    #         data = ws.receive()
+    #     except:
+    #         #if the connection was terminated, remove them from teh set and break
+    #         leave_loop = True
+    #     if data == b'': 
+    #         leave_loop = True
+    #     if leave_loop:
+    #         ws_set.remove(ws)
+    #         break
+    #     print("\n\n\n\n\nHERE:")
+    #     print(data)
         # print(data)
-        data = loads(data)
+        # data = loads(data)
+        data = loads(json)
         # print(data)
         auth_token_from_browser = request.cookies.get('auth_token', None)
-    #Checking if the user has an auth token present
+        #Checking if the user has an auth token present
         if auth_token_from_browser is not None:
             #Hashing the token by calling the SHA256 function
             encrypt_auth_token = sha256(auth_token_from_browser.encode()).digest()
@@ -119,15 +125,16 @@ def echo(ws):
                 data = dumps(data)
                 # print("sending",data)
                 #Sending the WS response using send for each socket connection
-                send_to_all(data)
+                # send_to_all(data)
+                emit("ws response", data, broadcast=True)
 
-def send_to_all(data):
-    global ws_set
-    print(f'There are {len(ws_set)} connections: they are: {ws_set}')
-    for socket in ws_set:
-        if not socket.close:
-            socket.send(data)
-            print(f"Data sent to: {socket}")
+# def send_to_all(data):
+#     global ws_set
+#     print(f'There are {len(ws_set)} connections: they are: {ws_set}')
+#     for socket in ws_set:
+#         if not socket.close:
+#             socket.send(data)
+#             print(f"Data sent to: {socket}")
 
 #Decorator to turn Python function style_page into Flask view function
 @app.route('/static/css/<path:file_path>')
@@ -413,3 +420,4 @@ def like_message():
 if __name__ == "__main__":
     #If so, calling run (on app) on the local host and port 8080
     app.run(host='0.0.0.0', port='8080')
+    socketio.run(app)

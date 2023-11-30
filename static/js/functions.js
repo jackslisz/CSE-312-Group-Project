@@ -10,6 +10,10 @@ function initWS() {
 
     // Called whenever data is received from the server over the WebSocket connection
     socket.onmessage = function (ws_message) {
+        var socket = io();
+        socket.on('connect', function() {
+            socket.emit('websocket_message', {data: 'I\'m connected!'});
+        });
         const message = JSON.parse(ws_message.data);
         const messageType = message.messageType
         if(messageType === 'chatMessage'){
@@ -185,7 +189,7 @@ function addGrade(messageJSON) {
 
 function addGradeQuestions(messageJSON) {
     const chatMessages = document.getElementById("grades-all");
-    chatMessages.innerHTML += "Question "+messageJSON["title"]+"; Answer "+ messageJSON["correctanswer"] + "</br>" 
+    chatMessages.innerHTML += "Question "+messageJSON["title"]+"; Answer "+ messageJSON["correctanswer"] + "</br></br>" 
     chatMessages.scrollIntoView(false);
     chatMessages.scrollTop = chatMessages.scrollHeight - chatMessages.clientHeight;
 }
