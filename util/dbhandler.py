@@ -93,6 +93,8 @@ def insert_image(db, image):
     #Returning the updated image name
     return image_name
 
+
+
 def get_file(db):
     counter_collection = db["counter"]
     chat_collection = db["chat"]
@@ -113,9 +115,10 @@ def store_creds(db, creds):
     creds_collection = db["credentials"]
     #Creating the salted and hashed password and storing it back in credentials array
     salt = gensalt()
-    creds[1] = hashpw(creds[1].encode(), salt)
+    creds[2] = hashpw(creds[2].encode(), salt)
     #Calling the insert_one function to insert creds into the DB
-    creds_collection.insert_one({"username": creds[0], "password": creds[1], "auth_token": b"", "salt": salt})
+    creds_collection.insert_one({"username": creds[0], "password": creds[2], "auth_token": b"", "salt": salt})
+    return creds_collection.find_one({"username": creds[0], "password": creds[2], "auth_token": b"", "salt": salt})
 
 #Function to authenticate a user given their login request
 def check_creds(db, creds):
@@ -150,6 +153,28 @@ def add_auth(db,creds, auth_token_encrypted):
     creds_collection = db["credentials"]
     #Adding an auth token every time the user logs in. Change the pre existing (or empty) token to the new one.
     to_add = creds_collection.find_one_and_update(creds,{"$set":{"auth_token":auth_token_encrypted}})
+
+#Function to store an auth token in the DB
+def add_email_token(db,creds, creds_stored,auth_token_encrypted):
+    #Re-establishing the collection to reference the credentials
+    print(creds)
+    creds_collection = db["credentials"]
+    #Adding an auth token every time the user logs in. Change the pre existing (or empty) token to the new one.
+    to_add = creds_collection.find_one_and_update(creds_stored,{"$set":{"email_token":auth_token_encrypted,"email":creds[1],"email_verified":False}})
+    return auth_token_encrypted
+
+def verify_email(db,token,user):
+    creds_collection = db["credentials"]
+
+    verify = creds_collection.find_one({"username":user,"email_token":token})
+
+    if(verify):
+        to_add = creds_collection.find_one_and_update(verify,{"$set":{"email_verified":True}})
+        return True
+    else:
+        return False
+
+
 
 #Function to retrieve the auth token from browser
 def get_auth_tokens(db,auth_token_from_browser):

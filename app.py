@@ -11,6 +11,7 @@ from util.dbhandler import *
 # from uswgi import *
 from bson import json_util
 from flask_sock import Sock
+from flask_mail import *
 
 # TODO : 
 # FIX WEBSOCKETS NOT SENDING TO ALL CONNECTIONS
@@ -23,6 +24,18 @@ app = Flask(__name__, static_url_path="/static")
 db = db_init()
 #Decorators to turn Python function home_page into Flask view function
 sock = Sock(app)
+
+all_settings = {
+    "MAIL_SERVER": 'smtp.gmail.com',
+    "MAIL_PORT": 465,
+    "MAIL_USE_TLS": False,
+    "MAIL_USE_SSL": True,
+    "MAIL_USERNAME": "thecodedeamons@gmail.com",
+    "MAIL_PASSWORD": "pder nbhh pcvk cnwi"
+}
+app.config.update(all_settings)
+mail = Mail(app)
+
 #Creating a global variable to hold the set of all WS connections
 global ws_set
 ws_set = set()
@@ -40,7 +53,14 @@ def home_page():
         db_result = get_auth_tokens(db, encrypt_auth_token) if get_auth_tokens(db, encrypt_auth_token) != None else {}
         #If so, calling render_template to look for and open the file index.html
         #Calling make_response to make a flask response to edit headers and MIME types
-        response = make_response(render_template('index_template.html', username=db_result.get("username", 'Guest')))
+        try:
+            if(not db_result["email_verified"]):
+                response = make_response(render_template('index_template.html', verification="You need to verify your email!",username=db_result.get("username", 'Guest')))
+            else:
+                response = make_response(render_template('index_template.html', verification="You have been verified!",username=db_result.get("username", 'Guest')))
+        except Exception as e:
+                response = make_response(render_template('index_template.html', verification="You need to verify your email!",username=db_result.get("username", 'Guest')))
+
     #Otherwise, replacing the template with the username "Guest"
     else:
         response = make_response(render_template('index_template.html', username='Guest'))
@@ -96,10 +116,12 @@ def echo(ws):
                     data["choice3"] = escape(data["choice3"])
                     data["choice4"] = escape(data["choice4"])
                     data["correctanswer"] = escape(data["correctanswer"])
+                    # if(data["username"])
                     id_ = insert_message_websocket(db, data, get_auth_tokens(db, encrypt_auth_token)["username"])
                     # print(id_)
                     data.update({"username" : get_auth_tokens(db, encrypt_auth_token)["username"]})
                     data.update({"id":id_})
+                    # if()
                     # get_data = get_file(db)
                     # if(get_data["image"]!=None):
                     #     data.update({"image":get_data["image"]})
@@ -110,7 +132,12 @@ def echo(ws):
                 #Checking if the incoming request is an answer to a question
                 elif data["messageType"] == "questionAnswer":
                     # if(data["correctornot"] == True):
-                    answer(db,data,data["correctornot"],get_auth_tokens(db, encrypt_auth_token)["username"])
+                    if(get_auth_tokens(db, encrypt_auth_token)["username"]==data["username"]):
+                        pass
+                    else:
+                        print(get_auth_tokens(db, encrypt_auth_token)["username"])
+                        print(data["username"])
+                        answer(db,data,data["correctornot"],get_auth_tokens(db, encrypt_auth_token)["username"])
                     # else:
 
                     #"selected": selected, "correctornot": selected == correct_answer_value}));
@@ -167,6 +194,19 @@ def image_page(file_path):
     #Returning the finished response
     return response
 
+# app.config.update(all_settings)
+@app.route('/nu')
+def email():
+    # with app.config():
+    # msg = Message(subject="Email",
+    #                     sender="codedemons@gmail.com",
+    #                     recipients=["longhornlewis966@gmail.com"], # replace with your email for testing
+    #                     body="This is a test email I sent with Gmail and Python!")
+    # mail.send(msg)
+    token = request.args.get("token")
+    username = request.args.get("username")
+
+
 #Decorator to turn Python function visit_counter_cookie into Flask view function
 @app.route("/visit-counter")
 def visit_counter_cookie():
@@ -206,8 +246,15 @@ def grade():
     # #Setting the correct MIME type for HTML
     # response.headers['Content-Type'] = 'text/html; charset=utf-8'    
     #Returning the finished response
-    # print(json_util.dumps(users))
-    return abort(401)
+    # if(users)
+        try:
+            # print(json_util.dumps(users))
+            return abort(401)
+        except Exception as e:
+            make_response(f"")
+
+    else:
+        make_response(f"")
 
 @app.route('/see-grade-questions', methods=["GET", "POST"])
 def grade_get():
@@ -235,6 +282,13 @@ def grade_get():
     # response.headers['X-Content-Type-Options'] = 'nosniff'
     # #Setting the correct MIME type for HTML
     # response.headers['Content-Type'] = 'text/html; charset=utf-8'    
+        #Returning the finished response
+        try:
+            print(json_util.dumps(users))
+
+            return json_util.dumps(users).encode()
+        except Exception as e:
+            make_response(f"")
     #Returning the finished response
     # print(json_util.dumps(users))
     return abort(401)
@@ -286,24 +340,58 @@ def chat_history():
         #Calling make_response to make a response using the JSON object in chat_history
         return make_response(chat_history)
     
+
+@app.route("/mail")
+def m():
+    token = request.args.get("token")
+    user=request.args.get("username")
+    verified = verify_email(db,token,user)
+    return redirect(url_for('home_page'))
+
 #Decorator to turn Python function register_user into Flask view function
 @app.route('/register', methods=["POST"])
 def register_user():
+    # print(request.get_data())
     #Retrieving the entire body of the request by calling get_data()
     creds = request.get_data().decode()
+    # print(creds)
     #Splitting the body to store the username (0) and password (1) inside creds
-    creds = creds.split('&', 1)
+    creds = creds.split('&')
     #Removing key from username/password to leave just the username/password
     creds[0] = creds[0].replace("username_reg=", "")
-    creds[1] = creds[1].replace("password_reg=", "")
+    creds[2] = creds[2].replace("password_reg=", "")
+    creds[1] = creds[1].replace("email_reg=", "")
+    print(creds)
     #Escaping any HTML tags that user put in their username
     creds[0] = escape(creds[0])
     #Inserting creds into DB by calling function from dbhandler.py
-    store_creds(db, creds)
+    creds_stored = store_creds(db, creds)
     #Removing the password from the credentials array
-    creds[1] = ""
+    creds[2] = ""
+        # if(authentication_attempt):
+        #If successful, create, Hash and store a random auth token
+    gen_auth_token = token_urlsafe(80)
+    # creds[1] = escape(creds[1])
+    #Calling gen_auth_token to generate a new auth token value for user
+    encrypt_auth_token = gen_auth_token
+    #Hashing the token by calling the SHA256 function
+    # encrypt_auth_token = sha256(encrypt_auth_token.encode()).digest()
+    #Calling add_auth to add the token to the DB
+    token = add_email_token(db, creds,creds_stored, encrypt_auth_token)
+    #Calling make_response to make and send a Flask response
+    response = redirect(url_for('home_page'))
+    print(creds[1])
+    msg = Message(subject="Verify your email",
+                        sender="codedemons@gmail.com",
+                        recipients=[creds[1].split("%40")[0]+"@"+creds[1].split("%40")[1]], # replace with your email for testing
+                        body="Thank you for signing up for the code deamons app!\n\nIn order to continue, you must verify your email. Click the link below to do so! \nhttp://localhost:8080/mail?token="+ token+"&username="+creds[0])
+    mail.send(msg)
+
+    #Make cookie of auth_token
+    # response.set_cookie('auth_token', gen_auth_token, max_age=3600, httponly=True) 
     #Sending a redirect to the home page by calling redirect() and url_for()
     return redirect(url_for('home_page'))
+
 
 #Decorator to turn Python function login_page into Flask view function
 @app.route("/login", methods=["POST"])
@@ -351,7 +439,7 @@ def image():
                 file = request.files["upload"]
                 if file.filename == "":
                     return redirect(url_for('home_page'))
-                image_name = insert_image(db, file)
+                image_name = insert_image(db)
                 file.save(image_name)
     
     # Obtain the unencrypted password
