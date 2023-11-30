@@ -31,7 +31,7 @@ all_settings = {
     "MAIL_USE_TLS": False,
     "MAIL_USE_SSL": True,
     "MAIL_USERNAME": "thecodedeamons@gmail.com",
-    "MAIL_PASSWORD": "pder nbhh pcvk cnwi"
+    "MAIL_PASSWORD": "none"
 }
 app.config.update(all_settings)
 mail = Mail(app)
