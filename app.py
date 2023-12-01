@@ -391,7 +391,7 @@ def register_user():
     msg = Message(subject="Verify your email",
                         sender="codedemons@gmail.com",
                         recipients=[creds[1].split("%40")[0]+"@"+creds[1].split("%40")[1]], # replace with your email for testing
-                        body="Thank you for signing up for the code deamons app!\n\nIn order to continue, you must verify your email. Click the link below to do so! \nhttp://localhost:8080/mail?token="+ token+"&username="+creds[0])
+                        body="Thank you for signing up for the code demons app!\n\nIn order to continue, you must verify your email. Click the link below to do so! \nhttp://localhost:8080/mail?token="+ token+"&username="+creds[0])
     mail.send(msg)
 
     #Make cookie of auth_token

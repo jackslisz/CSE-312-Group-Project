@@ -10,7 +10,7 @@
 <!-- Calling welcome function from JS file -->
 <body onload="welcome();">
 
-<!-- Title section, displaying the H2 text -->=
+<!-- Title section, displaying the H2 text -->
 <div class="title">
     <h2>CSE312 Group Project - code_demons - Multiple Choice QUIZMASTER</h2>
 </div>
@@ -30,8 +30,8 @@
     <div class="chat">
         <div id="chat-messages"></div>
         <div class="the-line"><hr></div>
-        <h4><span><i class="bi bi-person-fill"></i>Logged in as: {{username}}</span></h4>
-        <h4><span><i class="bi bi-person-fill"></i>{{ verification }}</span></h4>
+        <h4><span><i class="bi bi-person-fill"></i>&nbsp;Logged in as: {{username}}</span></h4>
+        <!-- <h4><span><i class="bi bi-person-fill"></i>{{ verification }}</span></h4> -->
 
         <h4><strong>My Grades - </strong></h4>
         <div id="grades-stud">
@@ -53,10 +53,11 @@
                     <label>Username:
                         <input id="reg-form-username" type="text" name="username_reg"/>
                     </label>
-                    <br/>
-                    <label>Email:
+                    </br>
+                    <label>Email:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                         <input id="reg-form-email" type="text" name="email_reg"/>
                     </label>
+                    </br>
                     <label>Password:&nbsp;
                         <input id="reg-form-pass" type="password" name="password_reg">
                     </label>
