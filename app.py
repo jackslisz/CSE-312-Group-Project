@@ -11,6 +11,7 @@ from util.dbhandler import *
 # from uswgi import *
 from bson import json_util
 from flask_sock import Sock
+from flask_socketio import SocketIO, emit
 
 # TODO : 
 # FIX WEBSOCKETS NOT SENDING TO ALL CONNECTIONS
@@ -22,7 +23,7 @@ app = Flask(__name__, static_url_path="/static")
 #Initializing the Database (DB)
 db = db_init()
 #Decorators to turn Python function home_page into Flask view function
-sock = Sock(app)
+sock = SocketIO(app)
 #Creating a global variable to hold the set of all WS connections
 global ws_set
 ws_set = set()
@@ -51,7 +52,7 @@ def home_page():
     #Returning the finished response
     return response
 
-@sock.route('/websocket')
+@sock.on('ws', namespace='/websocket')
 def echo(ws):
     global ws_set
     #Adding the current WS connection to the set of connections
@@ -412,4 +413,4 @@ def like_message():
 #Checking if __name__ is the name of top-level environment of program
 if __name__ == "__main__":
     #If so, calling run (on app) on the local host and port 8080
-    app.run(host='0.0.0.0', port='8080')
+    sock.run(app, host='0.0.0.0', port='8080', allow_unsafe_werkzeug=True)
