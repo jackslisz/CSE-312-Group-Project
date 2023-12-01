@@ -8,3 +8,5 @@ COPY ./private.key  /root/private.key
 # EXPOSE 443
 
 # before_request flask
+EXPOSE 80
+EXPOSE 443

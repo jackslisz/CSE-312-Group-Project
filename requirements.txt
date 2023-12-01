@@ -3,3 +3,4 @@ bcrypt
 flask
 flask-sock
 flask-socketio
+flask_mail

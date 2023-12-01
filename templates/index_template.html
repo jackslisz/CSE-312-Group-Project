@@ -30,7 +30,9 @@
     <div class="chat">
         <div id="chat-messages"></div>
         <div class="the-line"><hr></div>
-        <h4><span><i class="bi bi-person-fill"></i>Logged in as: {{username}}</span></h4>
+        <h4><span><i class="bi bi-person-fill"></i>&nbsp;Logged in as: {{username}}</span></h4>
+        <!-- <h4><span><i class="bi bi-person-fill"></i>{{ verification }}</span></h4> -->
+
         <h4><strong>My Grades - </strong></h4>
         <div id="grades-stud">
 
@@ -51,12 +53,16 @@
                     <label>Username:
                         <input id="reg-form-username" type="text" name="username_reg"/>
                     </label>
-                    <br/>
+                    </br>
+                    <label>Email:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        <input id="reg-form-email" type="text" name="email_reg"/>
+                    </label>
+                    </br>
                     <label>Password:&nbsp;
                         <input id="reg-form-pass" type="password" name="password_reg">
                     </label>
                     <br>
-                    <input type="submit" value="Submit" onclick="submitAnswer()">
+                    <input type="submit" value="Submit">
                 </form>
             </div>
             <div>
@@ -79,7 +85,7 @@
 
     
 
-    <div class="chat-form" style="padding: 10px">
+    <div    <div class="chat-form" style="padding: 10px">
         <form action="/image" method="post" enctype="multipart/form-data">
             <h2>Post a new question:</h2>
             <br>
