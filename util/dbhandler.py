@@ -4,10 +4,12 @@ from bcrypt import *
 from html import *
 
 #Initialization function for both collections within the DB
+
+    
 def db_init():
     #Creating variables to reference different layers of MongoDB
-    mongo_client = MongoClient("mongo")
-    # mongo_client = MongoClient("localhost")
+    # mongo_client = MongoClient("mongo")
+    mongo_client = MongoClient("localhost")
     db = mongo_client["CSE312-Project-One"]
     #Creating collection to reference the chat history
     chat_collection = db["chat"]
@@ -108,7 +110,11 @@ def insert_message(db, body, username):
     #Calling the insert_one function to insert the message into the DB
     # print(body)
     chat_collection.insert_one({"username": username, "title": escape(body[0]), "description": escape(body[1]), "choice1": escape(body[2]), "choice2": escape(body[3]), "choice3": escape(body[4]), "choice4": escape(body[5].replace("}", "")), "correctanswer": escape(body[6]), "id": int(counter_collection.find_one({},{}).get("count")),"likes":0, "likers":[]})
-
+# def clear(db):
+#     creds_collection = db["credentials"]
+#     chat_collection = db["chat"]
+#     counter_collection = db["counter"]
+#     db.c
 #Function to store new credentials from a registration request in the DB
 def store_creds(db, creds):
     #Re-establishing the collection to reference the credentials

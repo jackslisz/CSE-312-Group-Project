@@ -12,6 +12,7 @@ from util.dbhandler import *
 from bson import json_util
 from flask_sock import Sock
 from flask_socketio import SocketIO, emit
+from flask_mail import *
 
 # TODO : 
 # FIX WEBSOCKETS NOT SENDING TO ALL CONNECTIONS
@@ -25,15 +26,14 @@ db = db_init()
 #Decorators to turn Python function home_page into Flask view function
 # sock = SocketIO(app)
 app.config['SECRET_KEY'] = 'secret!'
-sock = SocketIO(app)
+sock = SocketIO(app,cors_allowed_origins='http://localhost:8080')
 
 all_settings = {
     "MAIL_SERVER": 'smtp.gmail.com',
     "MAIL_PORT": 465,
     "MAIL_USE_TLS": False,
     "MAIL_USE_SSL": True,
-    "MAIL_USERNAME": "thecodedeamons@gmail.com",
-    "MAIL_PASSWORD": "none"
+
 }
 app.config.update(all_settings)
 mail = Mail(app)
@@ -73,15 +73,15 @@ def home_page():
     #Returning the finished response
     return response
 
-@sock.on('ws', namespace='/websocket')
+@sock.on('websocket_message')
 def echo(ws):
     global ws_set
     #Adding the current WS connection to the set of connections
-    print(ws)
-    ws_set.add(ws)
+    print("webskt:",ws)
+    # ws_set.add(ws)
     print(ws_set)
     data = b''
-    while True:
+    # while True:
     #     leave_loop = False
     #     try:
     #         data = ws.receive()
@@ -97,60 +97,64 @@ def echo(ws):
     #     print(data)
         # print(data)
         # data = loads(data)
-        data = loads(json)
-        # print(data)
-        auth_token_from_browser = request.cookies.get('auth_token', None)
-        #Checking if the user has an auth token present
-        if auth_token_from_browser is not None:
-            #Hashing the token by calling the SHA256 function
-            encrypt_auth_token = sha256(auth_token_from_browser.encode()).digest()
-            #Checking whether the DB contains that auth token 
-            if(get_auth_tokens(db, encrypt_auth_token)):
-                #Checking if the incoming request is a new message
-                if data["messageType"] == "chatMessage":
-                    #If so, updating the unique ID of the new message
-                    update_id(db)
-                    #Inserting the message into the DB using splicing
-                    # print(get_auth_tokens(db, encrypt_auth_token)["username"])
-                    data["title"] = escape(data["title"])
-                    data["description"] = escape(data["description"])
-                    data["choice1"] = escape(data["choice1"])
-                    data["choice2"] = escape(data["choice2"])
-                    data["choice3"] = escape(data["choice3"])
-                    data["choice4"] = escape(data["choice4"])
-                    data["correctanswer"] = escape(data["correctanswer"])
-                    # if(data["username"])
-                    id_ = insert_message_websocket(db, data, get_auth_tokens(db, encrypt_auth_token)["username"])
-                    # print(id_)
-                    data.update({"username" : get_auth_tokens(db, encrypt_auth_token)["username"]})
-                    data.update({"id":id_})
-                    # if()
-                    # get_data = get_file(db)
-                    # if(get_data["image"]!=None):
-                    #     data.update({"image":get_data["image"]})
-                    # else:
-                    #     data.update({"image":"quizicon.ico"})
-                    # data.update({"id" : get_auth_tokens(db, encrypt_auth_token)["username"]})
-                    # print(data)
-                #Checking if the incoming request is an answer to a question
-                elif data["messageType"] == "questionAnswer":
-                    # if(data["correctornot"] == True):
-                    if(get_auth_tokens(db, encrypt_auth_token)["username"]==data["username"]):
-                        pass
-                    else:
-                        print(get_auth_tokens(db, encrypt_auth_token)["username"])
-                        print(data["username"])
-                        answer(db,data,data["correctornot"],get_auth_tokens(db, encrypt_auth_token)["username"])
-                    # else:
+    # try:
+    data = ws
+    print("msg",data)
 
-                    #"selected": selected, "correctornot": selected == correct_answer_value}));
-                # mute
-                    # data["selected":selected]
-                data = dumps(data)
-                # print("sending",data)
-                #Sending the WS response using send for each socket connection
-                # send_to_all(data)
-                emit("ws response", data, broadcast=True)
+    auth_token_from_browser = request.cookies.get('auth_token', None)
+    #Checking if the user has an auth token present
+    if auth_token_from_browser is not None:
+        #Hashing the token by calling the SHA256 function
+        print("auth ")
+        encrypt_auth_token = sha256(auth_token_from_browser.encode()).digest()
+        #Checking whether the DB contains that auth token 
+        if(get_auth_tokens(db, encrypt_auth_token)):
+            #Checking if the incoming request is a new message
+            if data["messageType"] == "chatMessage":
+                #If so, updating the unique ID of the new message
+                update_id(db)
+                #Inserting the message into the DB using splicing
+                # print(get_auth_tokens(db, encrypt_auth_token)["username"])
+                data["title"] = escape(data["title"])
+                data["description"] = escape(data["description"])
+                data["choice1"] = escape(data["choice1"])
+                data["choice2"] = escape(data["choice2"])
+                data["choice3"] = escape(data["choice3"])
+                data["choice4"] = escape(data["choice4"])
+                data["correctanswer"] = escape(data["correctanswer"])
+                # if(data["username"])
+                id_ = insert_message_websocket(db, data, get_auth_tokens(db, encrypt_auth_token)["username"])
+                # print(id_)
+                data.update({"username" : get_auth_tokens(db, encrypt_auth_token)["username"]})
+                data.update({"id":id_})
+                # if()
+                # get_data = get_file(db)
+                # if(get_data["image"]!=None):
+                #     data.update({"image":get_data["image"]})
+                # else:
+                #     data.update({"image":"quizicon.ico"})
+                # data.update({"id" : get_auth_tokens(db, encrypt_auth_token)["username"]})
+                # print(data)
+            #Checking if the incoming request is an answer to a question
+            elif data["messageType"] == "questionAnswer":
+                # if(data["correctornot"] == True):
+                if(get_auth_tokens(db, encrypt_auth_token)["username"]==data["username"]):
+                    pass
+                else:
+                    print(get_auth_tokens(db, encrypt_auth_token)["username"])
+                    print(data["username"])
+                    answer(db,data,data["correctornot"],get_auth_tokens(db, encrypt_auth_token)["username"])
+                # else:
+
+                #"selected": selected, "correctornot": selected == correct_answer_value}));
+            # mute
+                # data["selected":selected]
+            data = dumps(data)
+            # print("sending",data)
+            #Sending the WS response using send for each socket connection
+            # send_to_all(data)
+            print("daaaaaaaata",data)
+            emit("ws_response", data, broadcast=True)
 
 # def send_to_all(data):
 #     global ws_set
@@ -203,8 +207,6 @@ def image_page(file_path):
 def email():
     # with app.config():
     # msg = Message(subject="Email",
-    #                     sender="codedemons@gmail.com",
-    #                     recipients=["longhornlewis966@gmail.com"], # replace with your email for testing
     #                     body="This is a test email I sent with Gmail and Python!")
     # mail.send(msg)
     token = request.args.get("token")
@@ -386,7 +388,6 @@ def register_user():
     response = redirect(url_for('home_page'))
     print(creds[1])
     msg = Message(subject="Verify your email",
-                        sender="codedemons@gmail.com",
                         recipients=[creds[1].split("%40")[0]+"@"+creds[1].split("%40")[1]], # replace with your email for testing
                         body="Thank you for signing up for the code demons app!\n\nIn order to continue, you must verify your email. Click the link below to do so! \nhttp://localhost:8080/mail?token="+ token+"&username="+creds[0])
     mail.send(msg)
