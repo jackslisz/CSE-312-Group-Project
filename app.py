@@ -13,6 +13,8 @@ from bson import json_util
 from flask_sock import Sock
 from flask_socketio import SocketIO, emit
 from flask_mail import *
+import time
+from flask_limiter import Limiter,util
 
 # TODO : 
 # FIX WEBSOCKETS NOT SENDING TO ALL CONNECTIONS
@@ -42,10 +44,23 @@ mail = Mail(app)
 global ws_set
 ws_set = set()
 
+global requested_ip_list
+requested_ip_list = {}
+global blocked
+blocked = False
+
+
+
 @app.route("/")
 @app.route("/home", methods=["GET", "POST"])
 def home_page():
+    print(blocked)
     #Retrieving the authentication token from browser
+    if(blocked):
+        # response = make_response(render_template("hack.html"))
+        # return response
+        print("here!")
+        abort(429)
     auth_token_from_browser = request.cookies.get('auth_token', None)
     #Checking if the user has an auth token present
     if auth_token_from_browser is not None:
@@ -81,22 +96,6 @@ def echo(ws):
     # ws_set.add(ws)
     print(ws_set)
     data = b''
-    # while True:
-    #     leave_loop = False
-    #     try:
-    #         data = ws.receive()
-    #     except:
-    #         #if the connection was terminated, remove them from teh set and break
-    #         leave_loop = True
-    #     if data == b'': 
-    #         leave_loop = True
-    #     if leave_loop:
-    #         ws_set.remove(ws)
-    #         break
-    #     print("\n\n\n\n\nHERE:")
-    #     print(data)
-        # print(data)
-        # data = loads(data)
     # try:
     data = ws
     print("msg",data)
@@ -207,6 +206,8 @@ def image_page(file_path):
 def email():
     # with app.config():
     # msg = Message(subject="Email",
+    #                     sender="codedemons@gmail.com",
+    #                     recipients=["longhornlewis966@gmail.com"], # replace with your email for testing
     #                     body="This is a test email I sent with Gmail and Python!")
     # mail.send(msg)
     token = request.args.get("token")
@@ -224,6 +225,31 @@ def visit_counter_cookie():
     response.set_cookie('visit_counter', str(int(visit_count) + 1), max_age=3600) 
     #Returning the finished response
     return response
+
+@app.before_request
+def rate_limits():
+    # print(time.time())
+    print(request.remote_addr)
+    current_time=time.time()
+    if request.remote_addr not in requested_ip_list:
+        requested_ip_list[str(request.remote_addr)] = [0,current_time,False]
+    else:
+        # print(current_time-requested_ip_list[request.remote_addr][1])
+        if(requested_ip_list[str(request.remote_addr)][2]==True):
+            response = abort(429)
+            return response  
+        if(requested_ip_list[str(request.remote_addr)][0]+1>50 and (current_time-requested_ip_list[str(request.remote_addr)][1])<10):
+            requested_ip_list[str(request.remote_addr)]= [requested_ip_list[str(request.remote_addr)][0]+1,current_time,True]
+            blocked = True
+            abort(429)
+        requested_ip_list[str(request.remote_addr)]= [requested_ip_list[str(request.remote_addr)][0]+1,current_time,False]
+    
+
+# @app.route("/hack.html", methods=["GET","POST"])
+# def hack():
+#     response = make_response(render_template("hack.html"))
+
+
 
 @app.route('/see-grade', methods=["GET", "POST"])
 def grade():
@@ -337,6 +363,17 @@ def chat_message():
 
 #Decorator to turn Python function chat_history into Flask view function
 #Commented to test functionality of websocket. If this is commented and new chat messages appear, websocket is the only functionality that enables this.
+# @app.before_request
+# def rate_limit():
+#     # print(time.time())
+#     if request.remote_addr not in requested_ip_list:
+#         print("omg")
+#         requested_ip_list[request.remote_addr] = time.time()
+#     else:
+#         # print(requested_ip_list[request.remote_addr])
+#         if(time.time()-requested_ip_list[request.remote_addr]>50):
+#             response = make_response("are you trying to hack me bro?????????")
+#             return response
 @app.route('/chat-history')
 def chat_history():
     #Checking if the chat's history is not empty
@@ -388,6 +425,7 @@ def register_user():
     response = redirect(url_for('home_page'))
     print(creds[1])
     msg = Message(subject="Verify your email",
+                        sender="codedemons312@gmail.com",
                         recipients=[creds[1].split("%40")[0]+"@"+creds[1].split("%40")[1]], # replace with your email for testing
                         body="Thank you for signing up for the code demons app!\n\nIn order to continue, you must verify your email. Click the link below to do so! \nhttp://localhost:8080/mail?token="+ token+"&username="+creds[0])
     mail.send(msg)
@@ -470,6 +508,7 @@ def image():
     #Returning the Flask response
     return redirect(url_for('home_page'))
         
+
 @app.route("/submit-answer", methods=["POST"])
 def submit_answer():
     #Retrieving the authentication token
