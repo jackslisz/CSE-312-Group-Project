@@ -1,20 +1,28 @@
 const ws = true;
-let socket = null;
-let timers = {};
+// let socket = null;
+// let timers = {};
 let timerInterval;
+// let refreshesintensec;
 
 
 function initWS() {
     // Establish a WebSocket connection with the server
-    socket = new WebSocket('wss://' + window.location.host + '/websocket');
+    // socket = new WebSocket('s://' + window.location.host + '/websocket');
+    console.log("i want to be a websocket");
+    socket = io.connect({port: 8000, rememberTransport: false, transports: ["websocket"], upgrade:true});
+    socket.on('connect', function() {
+        // refreshesintensec++
+        
+        console.log("omg websocket:)")
+        // socket.emit('websocket_message', {data: 'I\'m connected!'});
+    });
+    console.log(socket);
 
     // Called whenever data is received from the server over the WebSocket connection
-    socket.onmessage = function (ws_message) {
-        var socket = io();
-        socket.on('connect', function() {
-            socket.emit('websocket_message', {data: 'I\'m connected!'});
-        });
-        const message = JSON.parse(ws_message.data);
+    socket.on('ws_response', function(ws_message){
+        console.log("heyyy man");
+        console.log(ws_message)
+        const message = JSON.parse(ws_message);
         const messageType = message.messageType
         if(messageType === 'chatMessage'){
             addMessageToChat(message);
@@ -23,7 +31,21 @@ function initWS() {
             //processMessageAsWebRTC(message, messageType);
         }
     }
+    )
 }
+
+// var countdown = 1000;
+// setInterval(function() {
+//   countdown--;
+//   io.sockets.emit('timer', {countdown: countdown});
+// }, 1000);
+
+// io.sockets.on('connection', function(socket) {
+//   socket.on('reset', function(data) {
+//     countdown = 1000;
+//     io.sockets.emit('timer', {countdown: countdown});
+//   });
+// });
 
 
 function deleteMessage(messageId) {
@@ -113,6 +135,13 @@ function chatMessageHTML(messageJSON) {
     </form>
     <button onclick="startTimer(${messageId})">Start Timer</button>
     <br>
+    <form action="/image" method="post" enctype="multipart/form-data">
+    <p class="horizontal_space"></p>
+    <label for="formfile">(Optional) Upload an image for your question: </label>
+    <input id="formfile" type="file" name="upload">
+    <br/>
+    <input type="submit" id="submit_${messageId}" value="Submit Pic">
+    </form>
     </div>`
     return messageHTML;
 
@@ -226,6 +255,7 @@ function submitAnswer(event, param,question_,username_) {
     }
     else{
         request.open("POST", "/submit-answer");
+        for (let m=0;m<100;m++)
         request.send(JSON.stringify(messageJSON));
     }
 }
@@ -262,7 +292,8 @@ function sendChat() {
     request.open("POST", "/chat-message");
     // console.log()
     if(ws){
-        socket.send(JSON.stringify({'messageType': 'chatMessage',"title": title, "description": description,"choice1": choice1, "choice2": choice2, "choice3": choice3, "choice4": choice4, "correctanswer": correct_answer_value}));
+
+        socket.emit('websocket_message',{'messageType': 'chatMessage',"title": title, "description": description,"choice1": choice1, "choice2": choice2, "choice3": choice3, "choice4": choice4, "correctanswer": correct_answer_value});
         // time()
     }
     else{
@@ -288,6 +319,7 @@ function updateChat() {
     request.send();
 }
 
+
 function seeGrade(){
     console.log("hello")
     const request = new XMLHttpRequest();
@@ -304,6 +336,14 @@ function seeGrade(){
     request.open("GET", "/see-grade");
     request.send();
 }
+
+function dosattack(){
+for(let m=0;m<150;m++){
+    console.log(m)
+    seeGrade()
+}
+}
+// dosattack()
 
 function seeGradeStudent(){
     console.log("hello")
@@ -357,6 +397,9 @@ function welcome() {
 
     if (ws) {
         initWS();
+        // for(let m=0;m<150;m++){
+        //     updateChat()
+        // }
     } else {
         setInterval(updateChat, 2000);
         const videoElem = document.getElementsByClassName('video-chat')[0];
