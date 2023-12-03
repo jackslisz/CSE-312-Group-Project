@@ -235,6 +235,9 @@ def rate_limits():
         requested_ip_list[str(request.remote_addr)] = [0,current_time,False]
     else:
         # print(current_time-requested_ip_list[request.remote_addr][1])
+        if(current_time-requested_ip_list[str(request.remote_addr)][1]>30):
+            requested_ip_list[str(request.remote_addr)] = [0,current_time,False]
+
         if(requested_ip_list[str(request.remote_addr)][2]==True):
             response = abort(429)
             return response  
