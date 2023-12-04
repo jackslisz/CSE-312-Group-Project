@@ -36,6 +36,7 @@ all_settings = {
     "MAIL_USE_TLS": False,
     "MAIL_USE_SSL": True,
 
+
 }
 app.config.update(all_settings)
 mail = Mail(app)
@@ -121,6 +122,7 @@ def echo(ws):
                 data["choice3"] = escape(data["choice3"])
                 data["choice4"] = escape(data["choice4"])
                 data["correctanswer"] = escape(data["correctanswer"])
+                data["image"] = (data["image"])
                 # if(data["username"])
                 id_ = insert_message_websocket(db, data, get_auth_tokens(db, encrypt_auth_token)["username"])
                 # print(id_)
@@ -241,7 +243,7 @@ def rate_limits():
         if(requested_ip_list[str(request.remote_addr)][2]==True):
             response = abort(429)
             return response  
-        if(requested_ip_list[str(request.remote_addr)][0]+1>50 and (current_time-requested_ip_list[str(request.remote_addr)][1])<10):
+        if(requested_ip_list[str(request.remote_addr)][0]+1>500000 and (current_time-requested_ip_list[str(request.remote_addr)][1])<10):
             requested_ip_list[str(request.remote_addr)]= [requested_ip_list[str(request.remote_addr)][0]+1,current_time,True]
             blocked = True
             abort(429)
@@ -289,7 +291,7 @@ def grade():
             make_response(f"")
 
     else:
-        make_response(f"")
+        return make_response(f"")
 
 @app.route('/see-grade-questions', methods=["GET", "POST"])
 def grade_get():
@@ -360,7 +362,7 @@ def chat_message():
             # print("e", encrypt_auth_token)
             # print(get_auth_tokens(db, encrypt_auth_token))
             #Inserting the message into the DB using splicing
-            insert_message(db, body, get_auth_tokens(db, encrypt_auth_token)["username"])
+            insert_message_websocket(db, body, get_auth_tokens(db, encrypt_auth_token)["username"])
     #Calling make_response to make an empty flask response
     return make_response(f"")
 
@@ -392,7 +394,7 @@ def m():
     token = request.args.get("token")
     user=request.args.get("username")
     verified = verify_email(db,token,user)
-    return redirect(url_for('home_page'))
+    return make_response("checkyourbox.html")
 
 #Decorator to turn Python function register_user into Flask view function
 @app.route('/register', methods=["POST"])
@@ -476,16 +478,20 @@ def image():
     auth_token_from_browser = request.cookies.get('auth_token', None)
     #Checking if the user has an auth token present
     if auth_token_from_browser is not None:
+        print("I HAVE IMAGED!\r\n\r\n")
         #Hashing the token by calling the SHA256 function
         encrypt_auth_token = sha256(auth_token_from_browser.encode()).digest()
         #Checking whether the DB contains that auth token 
+        print("files",request.files)
         if(get_auth_tokens(db, encrypt_auth_token)):
             #Retrieve the data 
+            # print
             if request.files:
                 file = request.files["upload"]
                 if file.filename == "":
                     return redirect(url_for('home_page'))
                 image_name = insert_image(db)
+                print(image_name)
                 file.save(image_name)
     
     # Obtain the unencrypted password

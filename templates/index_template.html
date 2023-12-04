@@ -85,8 +85,13 @@
 
     
 
-    <div    <div class="chat-form" style="padding: 10px">
-        <!-- <form action="/image" method="post" enctype="multipart/form-data"> -->
+    <div class="chat-form" style="padding: 10px">
+            <!-- <form action="/image" id="image-form" method="post" >
+                <label for="formfile">(Optional) Upload an image for your question: </label>
+                <input id="formfile" type="file" name="upload">
+                <p class="horizontal_space"></p>
+                <input type="submit" id="submit_image" value="Submit Pic">
+            </form> -->
             <h2>Post a new question:</h2>
             <br>
             <label>
@@ -130,17 +135,15 @@
                 <option value="choice-4">Choice 4</option>
             </select>
             <hr>
-            <!--<label for="formfile">(Optional) Upload an image for your question: </label>
-            <input id="formfile" type="file" name="upload">-->
-            <br/>
+            <form action="/image" method="post" enctype="multipart/form-data">
+                <label for="formfile">(Optional) Upload an image for your question: </label>
+                <input id="formfile" type="file" name="upload">
+                <p class="horizontal_space"></p>
+                <button id="chat-button" onclick="sendChat()">Post with image</button>
+            </form>
+            <!-- <br/> -->
             <p class="horizontal_space"></p>
-            <!-- <form action="/image" id="image-form" method="post" > -->
-                <!-- <label for="formfile">(Optional) Upload an image for your question: </label> -->
-                <!-- <input id="formfile" type="file" name="upload"> -->
-                <!-- <br/> -->
-                <!-- <p class="horizontal_space"></p> -->
-                <button id="chat-button" onclick="sendChat()">Post</button>
-            <!-- </form> -->
+                <button id="chat-button" onclick="sendChat()">Post without image</button>
         <!-- </form> -->
     </div>
 </div>
