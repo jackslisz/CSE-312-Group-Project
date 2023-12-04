@@ -28,14 +28,13 @@ db = db_init()
 #Decorators to turn Python function home_page into Flask view function
 # sock = SocketIO(app)
 app.config['SECRET_KEY'] = 'secret!'
-sock = SocketIO(app,cors_allowed_origins='http://localhost:8080')
+sock = SocketIO(app,cors_allowed_origins='https://thecodedaemons.me')
 
 all_settings = {
     "MAIL_SERVER": 'smtp.gmail.com',
     "MAIL_PORT": 465,
     "MAIL_USE_TLS": False,
     "MAIL_USE_SSL": True,
-
 }
 app.config.update(all_settings)
 mail = Mail(app)
@@ -176,6 +175,7 @@ def echo(ws):
 
 @sock.on('timer')
 def handletimer(data):
+
     if(data["time"]<=0):
         disable_ans_question(db,data["question"],data["username"])
         return
@@ -276,7 +276,7 @@ def rate_limits():
         if(requested_ip_list[str(request.remote_addr)][2]==True):
             response = abort(429)
             return response  
-        if(requested_ip_list[str(request.remote_addr)][0]+1>500000 and (current_time-requested_ip_list[str(request.remote_addr)][1])<10):
+        if(requested_ip_list[str(request.remote_addr)][0]+1>50 and (current_time-requested_ip_list[str(request.remote_addr)][1])<10):
             requested_ip_list[str(request.remote_addr)]= [requested_ip_list[str(request.remote_addr)][0]+1,current_time,True]
             blocked = True
             abort(429)
@@ -465,7 +465,7 @@ def register_user():
     msg = Message(subject="Verify your email",
                         sender="codedemons312@gmail.com",
                         recipients=[creds[1].split("%40")[0]+"@"+creds[1].split("%40")[1]], # replace with your email for testing
-                        body="Thank you for signing up for the code demons app!\n\nIn order to continue, you must verify your email. Click the link below to do so! \nhttp://localhost:8080/mail?token="+ token+"&username="+creds[0])
+                        body="Thank you for signing up for the code demons app!\n\nIn order to continue, you must verify your email. Click the link below to do so! \nhttps://thecodedaemons.me/mail?token="+ token+"&username="+creds[0])
     mail.send(msg)
 
     #Make cookie of auth_token

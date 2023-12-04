@@ -140,11 +140,10 @@ function chatMessageHTML(messageJSON) {
     </label>
     </div>
     <br>
-    <input type="submit" id="submit_${messageId}" value="Submit" disabled="true">
     </form>
     
     <div>
-    <button id="timer" onclick="startTimer(${messageId},'${question_}','${username}')">Start Timer</button>
+    <button id="timer_${messageId}_" onclick="startTimer(${messageId},'${question_}','${username}')">Start Timer</button>
     <br>
     </div>`
     
@@ -250,27 +249,30 @@ function submitAnswernoEvent(param,question_,username_,CanReAnswer) {
 function startTimer(messageId,question,username) {
 //         timeRemaining: 60
 console.log("hiwn4funfi3u1```1111111111111111111111")
-    socket.emit("timer",{"time":10,"question":question,"username":username})
+    socket.emit("timer",{"time":60,"question":question,"username":username,"messageId":messageId})
+    let doc = document.getElementById("timer_"+messageId+"_")
+    doc.disabled=true
+    // document.getElementById("timer").style.visibility ="hidden"
+
+
     updateTimerDisplay(messageId,question,username)
 }
 function updateTimerDisplay(messageId,question,username) {
     const timerElement = document.getElementById(`timer_${messageId}`);
-    let submitButton = document.querySelector(`#submit_${messageId}`)
     if (timerElement) {
         // console.l
             socket.on("time_resp" , function(time){
-                submitButton.disabled = false
+                if(time.messageId==messageId){
                 let times=time.time
-                socket.emit("timer",{"time":time.time,"question":question,"username":username})
+                socket.emit("timer",{"time":time.time,"question":question,"username":username,"messageId":messageId})
                 timerElement.innerHTML = `Time remaining: ${times} seconds`;
                 if(times==0){
-                    timerElement.innerHTML = `Time finish!`;
+                    timerElement.innerHTML = `Time finished!`;
                     submitAnswernoEvent(messageId,question,username,false);
                     realGrade()
-                    let submitButton = document.querySelector(`#submit_${messageId}`)
-                    submitButton.disabled = true;
                     return true
                 }
+            }
 
             })
         //     timerElement.innerHTML = "Time's Up!";
