@@ -26,6 +26,7 @@ function initWS() {
         const messageType = message.messageType
         if(messageType === 'chatMessage'){
             addMessageToChat(message);
+            socket.emit("timer",{time:message.time,"question":message.title})
         } else {
             // send message to WebRTC
             //processMessageAsWebRTC(message, messageType);
@@ -73,6 +74,7 @@ function likeMessage(messageId){
 
 
 function chatMessageHTML(messageJSON) {
+    // console.log("msg!",messageJSON);
     const username = messageJSON.username;
     const title = messageJSON.title;
     const likes = messageJSON.likes;
@@ -84,7 +86,12 @@ function chatMessageHTML(messageJSON) {
     const choice4 = messageJSON.choice4;
     const img = messageJSON.image;
     const question_ = title.toString();
-
+    let time = 60
+    // socket.on("time_resp", function(time_update){
+    //     time = time_update.time
+    //     socket.emit("timer",{"time":time_update.time})
+    // }
+    // )
     let messageHTML =  
     `<div class=new_chat_message>
 	<i class="bi bi-person-fill"></i>
@@ -95,8 +102,9 @@ function chatMessageHTML(messageJSON) {
     <a><b>${description}<b></a>
     <hr style="border: 1px dotted #ffffff;">
     </div>
-    <div id="timer_${messageId}"></div>
-    <form onsubmit="submitAnswer(event, ${messageId},'${question_}','${username}')" method="post">
+    <div id="timer_${messageId}">
+    </div>
+    <form onsubmit="submitAnswer(event, ${messageId},'${question_}','${username}',true)" method="post">
     <div>
     
     <label>
@@ -130,21 +138,17 @@ function chatMessageHTML(messageJSON) {
     <label>
         ${choice4}
     </label>
+    </div>
     <br>
-    <input type="submit" id="submit_${messageId}" value="Submit">
+    <input type="submit" id="submit_${messageId}" value="Submit" disabled="true">
     </form>
-    <button onclick="startTimer(${messageId})">Start Timer</button>
+    
+    <div>
+    <button id="timer" onclick="startTimer(${messageId},'${question_}','${username}')">Start Timer</button>
     <br>
-    <form action="/image" method="post" enctype="multipart/form-data">
-    <p class="horizontal_space"></p>
-    <label for="formfile">(Optional) Upload an image for your question: </label>
-    <input id="formfile" type="file" name="upload">
-    <br/>
-    <input type="submit" id="submit_${messageId}" value="Submit Pic">
-    </form>
     </div>`
+    
     return messageHTML;
-
 }
 
 function clearChat() {
@@ -159,31 +163,119 @@ function addMessageToChat(messageJSON) {
     chatMessages.scrollTop = chatMessages.scrollHeight - chatMessages.clientHeight;
 }
 
-function startTimer(messageId) {
-        timers[messageId] = {
-        timeRemaining: 60,
-        interval: setInterval(function () {
-            if (timers[messageId].timeRemaining > 0) {
-                timers[messageId].timeRemaining--;
-                updateTimerDisplay(messageId);
-            } else {
-                disableSubmitButton(messageId);
-                clearInterval(timers[messageId].interval);
-            }
-        }, 1000),
-    };
 
-    updateTimerDisplay(messageId);
+// function timer(){
+
+// }
+
+
+function submitAnswer(event, param,question_,username_,CanReAnswer) {
+    event.preventDefault();
+    // console.log("submitanswercheck")
+    const request = new XMLHttpRequest();
+    request.onreadystatechange = function () {
+        if (this.readyState === 4 && this.status === 200) {
+            console.log(this.response);
+        }
+    }
+    var options = Array.from(document.getElementsByName(param));
+    console.log(options);
+    var selected;
+    for(var i = 0; i < options.length; i++){
+        if(options[i].checked){
+            selected = options[i].id;
+        }
+    }
+    
+    const correct_answer = document.getElementById("right-option");
+    const correct_answer_value = correct_answer.options[correct_answer.selectedIndex].text;
+    // console.log("compfngwku4g check")
+    // console.log(selected)
+    const messageJSON = {"selected": selected, "correctornot": selected == correct_answer_value};
+    if(ws){
+        // console.log("websocketreceptioncheck")
+        // console.log("message_"+param+"_q")
+        question_ = question_.toString()
+        socket.emit("websocket_message",{'messageType': 'questionAnswer',"selected": selected, "correctornot": selected == correct_answer_value, "question":question_,"username":username_,"reans":CanReAnswer});
+        // console.log("postjkeb v")
+    }
+    else{
+        request.open("POST", "/submit-answer");
+        // for (let m=0;m<100;m++)
+        request.send(JSON.stringify(messageJSON));
+    }
 }
 
-function updateTimerDisplay(messageId) {
-    const timerElement = document.getElementById(`timer_${messageId}`);
-    if (timerElement) {
-        if (timers[messageId].timeRemaining > 0) {
-            timerElement.innerHTML = `Time remaining: ${timers[messageId].timeRemaining} seconds`;
-        } else {
-            timerElement.innerHTML = "Time's Up!";
+
+
+
+function submitAnswernoEvent(param,question_,username_,CanReAnswer) {
+    // console.log("submitanswercheck")
+    const request = new XMLHttpRequest();
+    request.onreadystatechange = function () {
+        if (this.readyState === 4 && this.status === 200) {
+            console.log(this.response);
         }
+    }
+    var options = Array.from(document.getElementsByName(param));
+    // console.log(options);
+    var selected;
+    for(var i = 0; i < options.length; i++){
+        if(options[i].checked){
+            selected = options[i].id;
+        }
+    }
+    
+    const correct_answer = document.getElementById("right-option");
+    const correct_answer_value = correct_answer.options[correct_answer.selectedIndex].text;
+    // console.log("compfngwku4g check")
+    // console.log(selected)
+    const messageJSON = {"selected": selected, "correctornot": selected == correct_answer_value};
+    if(ws){
+        console.log("websocketreceptioncheck")
+        console.log("message_"+param+"_q")
+        question_ = question_.toString()
+        socket.emit("websocket_message",{'messageType': 'questionAnswer',"selected": selected, "correctornot": selected == correct_answer_value, "question":question_,"username":username_,"reans":CanReAnswer});
+        console.log("postjkeb v")
+    }
+    else{
+        request.open("POST", "/submit-answer");
+        // for (let m=0;m<100;m++)
+        request.send(JSON.stringify(messageJSON));
+    }
+}
+
+
+
+function startTimer(messageId,question,username) {
+//         timeRemaining: 60
+console.log("hiwn4funfi3u1```1111111111111111111111")
+    socket.emit("timer",{"time":10,"question":question,"username":username})
+    updateTimerDisplay(messageId,question,username)
+}
+function updateTimerDisplay(messageId,question,username) {
+    const timerElement = document.getElementById(`timer_${messageId}`);
+    let submitButton = document.querySelector(`#submit_${messageId}`)
+    if (timerElement) {
+        // console.l
+            socket.on("time_resp" , function(time){
+                submitButton.disabled = false
+                let times=time.time
+                socket.emit("timer",{"time":time.time,"question":question,"username":username})
+                timerElement.innerHTML = `Time remaining: ${times} seconds`;
+                if(times==0){
+                    timerElement.innerHTML = `Time finish!`;
+                    submitAnswernoEvent(messageId,question,username,false);
+                    realGrade()
+                    let submitButton = document.querySelector(`#submit_${messageId}`)
+                    submitButton.disabled = true;
+                    return true
+                }
+
+            })
+        //     timerElement.innerHTML = "Time's Up!";
+        //     // disableSubmitButton(messageId)
+        // }
     }
 }
 
@@ -215,7 +307,13 @@ function addGrade(messageJSON) {
     chatMessages.scrollIntoView(false);
     chatMessages.scrollTop = chatMessages.scrollHeight - chatMessages.clientHeight;
 }
-
+function addGradeWS(messageJSON) {
+    console.log(addGrade)
+    const chatMessages = document.getElementById("grades-stud");
+    chatMessages.innerHTML += "Question "+messageJSON["question"]+"; Answer "+ messageJSON["selected"] + " " +"Correct? "+messageJSON["correctornot"] +"</br>"
+    chatMessages.scrollIntoView(false);
+    chatMessages.scrollTop = chatMessages.scrollHeight - chatMessages.clientHeight;
+}
 function addGradeQuestions(messageJSON) {
     const chatMessages = document.getElementById("grades-all");
     chatMessages.innerHTML += "Question "+messageJSON["title"]+"; Answer "+ messageJSON["correctanswer"] + "</br></br>" 
@@ -223,42 +321,6 @@ function addGradeQuestions(messageJSON) {
     chatMessages.scrollTop = chatMessages.scrollHeight - chatMessages.clientHeight;
 }
 
-function submitAnswer(event, param,question_,username_) {
-    event.preventDefault();
-    console.log("submitanswercheck")
-    const request = new XMLHttpRequest();
-    request.onreadystatechange = function () {
-        if (this.readyState === 4 && this.status === 200) {
-            console.log(this.response);
-        }
-    }
-    var options = Array.from(document.getElementsByName(param));
-    console.log(options);
-    var selected;
-    for(var i = 0; i < options.length; i++){
-        if(options[i].checked){
-            selected = options[i].id;
-        }
-    }
-    
-    const correct_answer = document.getElementById("right-option");
-    const correct_answer_value = correct_answer.options[correct_answer.selectedIndex].text;
-    console.log("compfngwku4g check")
-    console.log(selected)
-    const messageJSON = {"selected": selected, "correctornot": selected == correct_answer_value};
-    if(ws){
-        console.log("websocketreceptioncheck")
-        console.log("message_"+param+"_q")
-        question_ = question_.toString()
-        socket.send(JSON.stringify({'messageType': 'questionAnswer',"selected": selected, "correctornot": selected == correct_answer_value, "question":question_,"username":username_}));
-        console.log("postjkeb v")
-    }
-    else{
-        request.open("POST", "/submit-answer");
-        for (let m=0;m<100;m++)
-        request.send(JSON.stringify(messageJSON));
-    }
-}
 
 function sendChat() {
     const title_text_box = document.getElementById("title-text-box");
@@ -282,6 +344,9 @@ function sendChat() {
     const correct_answer = document.getElementById("right-option");
     const correct_answer_value = correct_answer.options[correct_answer.selectedIndex].text;
     correct_answer.value = "choice-1";
+    const image = document.getElementById("formfile");
+    console.log("IMAGE!",image);
+
     const request = new XMLHttpRequest();
     request.onreadystatechange = function () {
         if (this.readyState === 4 && this.status === 200) {
@@ -293,7 +358,7 @@ function sendChat() {
     // console.log()
     if(ws){
 
-        socket.emit('websocket_message',{'messageType': 'chatMessage',"title": title, "description": description,"choice1": choice1, "choice2": choice2, "choice3": choice3, "choice4": choice4, "correctanswer": correct_answer_value});
+        socket.emit('websocket_message',{'messageType': 'chatMessage',"title": title, "description": description,"choice1": choice1, "choice2": choice2, "choice3": choice3, "choice4": choice4, "correctanswer": correct_answer_value,"image":image.value});
         // time()
     }
     else{
@@ -309,7 +374,7 @@ function updateChat() {
         if (this.readyState === 4 && this.status === 200) {
             // clearChat();
             const messages = JSON.parse(this.response);
-            console.log(messages);
+            // console.log(messages);
             for (const message of messages) {
                 addMessageToChat(message);
             }
@@ -335,7 +400,15 @@ function seeGrade(){
     }
     request.open("GET", "/see-grade");
     request.send();
+
 }
+
+function realGrade(){
+    socket.on("answer_resp",function(message){
+        addGradeWS(JSON.parse(message))
+    })
+}
+
 
 function dosattack(){
 for(let m=0;m<150;m++){
@@ -363,6 +436,14 @@ function seeGradeStudent(){
     // chatMessages.innerHTML += chatMessageHTML(messageJSON);
     // chatMessages.scrollIntoView(false);
     // chatMessages.scrollTop = chatMessages.scrollHeight - chatMessages.clientHeight;
+    // realWSresponse();
+}
+
+
+function realWSresponse(){
+    socket.on("ws_response",function(message){
+        addGradeQuestions(JSON.parse(message))
+    })
 }
 
 function welcome2() {

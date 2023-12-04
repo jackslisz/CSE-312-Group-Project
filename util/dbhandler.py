@@ -19,7 +19,7 @@ def db_init():
     counter_collection = db["counter"]
     image_counter = db["image_counter"]
     answer_collection = db["ans"]
-    question_collection  = db["question"]
+    chat_collection  = db["question"]
     #Checking if the counter collection is initialized already
     if counter_collection.count_documents({}) == 0:
         #If not, initializing it to 0
@@ -34,13 +34,16 @@ def db_init():
 #Function to return all of the chat's history
 def get_chat_history(db):
     #Re-establishing the collection to reference the chat history
-    chat_collection = db["chat"]
+    chat_collection = db["question"]
+    # db.drop_collection(chat_collection)
+    # db.drop_collection(question)
     #Returning all of the chat's history
     return chat_collection.find({}, {"_id": 0})
 
+
 def get_chat_history_particular_username(db,usernm):
     #Re-establishing the collection to reference the chat history
-    chat_collection = db["chat"]
+    chat_collection = db["question"]
     #Returning all of the chat's history
     return chat_collection.find({"username":usernm}, {"_id": 0})
 
@@ -52,10 +55,23 @@ def update_id(db):
     counter_collection.update_one({}, {"$set": {"count": counter_collection.find_one({},{}).get("count") + 1}})
 
 #FOR STUDENTS
+
+
 def answer(db,ans,correct,usrn):
     chat_collection = db["chat"]
     answer_collection = db["ans"]
-    answer_collection.insert_one({"question":escape(ans["question"]),"answer":ans["selected"],"correctornot":ans["correctornot"], "username":usrn})
+    chat_collection = db["question"]
+    
+    if(usrn in chat_collection.find_one({"title":ans["question"]})["cantans"]):
+        print("still cant ans!")
+        # pass
+    else:
+        if(ans["reans"]):
+            answer_collection.insert_one({"question":escape(ans["question"]),"answer":ans["selected"],"correctornot":ans["correctornot"],"fin":True, "username":usrn})
+        else:
+            answer_collection.insert_one({"question":escape(ans["question"]),"answer":ans["selected"],"correctornot":ans["correctornot"],"fin":True, "username":usrn})
+
+    return ans["reans"]
 
 def get_grades(db,username):
     answer_collection = db["ans"]
@@ -63,12 +79,29 @@ def get_grades(db,username):
 
 def question(db,q,usrn):
     chat_collection = db["chat"]
-    question_collection = db["question"]
-    question_collection.insert_one({"question":question["question"],"answer":question["selected"],"correctornot":question["correctornot"], "username":usrn})
+    chat_collection = db["question"]
+    chat_collection.insert_one({"question":question["question"],"answer":question["selected"],"correctornot":question["correctornot"], "username":usrn,"cantans":[]})
+
+def enable_ans_question(db,q,usrn):
+
+    chat_collection = db["question"]
+    the = "a"
+    print(q)
+    question_cantans = chat_collection.find_one({"title":q})["cantans"]
+    chat_collection.update_one({"title":q},{"$set":{"cantans":question_cantans.append(usrn)}})
+
+def disable_ans_question(db,q,usrn):
+    chat_collection = db["question"]
+    question_cantans = chat_collection.find_one({"title":q})["cantans"]
+    try:
+        question_cantans.append(usrn)
+        chat_collection.update_one({"title":q},{"$set":{"cantans":question_cantans}})
+    except Exception as e:
+        chat_collection.update_one({"title":q},{"$set":{"cantans":[usrn]}})
 
 def insert_image(db):
     #Re-establishing collections to reference credentials and message/image ID collections
-    chat_collection = db["chat"]
+    chat_collection = db["question"]
     counter_collection = db["counter"]
     image_counter = db["image_counter"]
     #Calling the update_one function to increment the current image ID value
@@ -79,6 +112,12 @@ def insert_image(db):
     chat_collection.update_one({"id": counter_collection.find_one({},{}).get("count")}, {"$set": {"image": image_name}})
     #Returning the updated image name
     return image_name
+def get_img(db):
+    chat_collection = db["question"]
+    counter_collection = db["counter"]
+    image_counter = db["image_counter"]
+    return chat_collection.find_one({"id": counter_collection.find_one({},{}).get("count")})["image"]
+
 
 
 
@@ -86,13 +125,13 @@ def insert_image(db):
 #Function to insert a message into DB with websocket
 def insert_message_websocket(db, body, username):
     #Re-establishing collections to account for chat history and unique IDs
-    chat_collection = db["chat"]
+    chat_collection = db["question"]
     counter_collection = db["counter"]
     #Calling the insert_one function to insert the message into the DB
     # print(body)
     #{"messageType":"chatMessage","title":"fegfeg","description":"e5h5r","choice1":"h5","choice2":"h5rh","choice3":"r5hr","choice4":"jh","correctanswer":"Choice 1"}
     id_=int(counter_collection.find_one({},{}).get("count"))
-    chat_collection.insert_one({"username": username, "title": body["title"], "description": body["description"], "choice1": body["choice1"], "choice2": body["choice2"], "choice3": body["choice3"], "choice4": body["choice4"], "correctanswer": body["correctanswer"], "image": insert_image(db), "id":id_})
+    chat_collection.insert_one({"username": username, "title": body["title"], "description": body["description"], "choice1": body["choice1"], "choice2": body["choice2"], "choice3": body["choice3"], "choice4": body["choice4"], "correctanswer": body["correctanswer"], "image": insert_image(db), "id":id_, "cantans":[username]})
     return id_
     # print(chat_collection.find_one({"username":username}))
 

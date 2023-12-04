@@ -36,7 +36,6 @@ all_settings = {
     "MAIL_USE_TLS": False,
     "MAIL_USE_SSL": True,
 
-
 }
 app.config.update(all_settings)
 mail = Mail(app)
@@ -55,13 +54,14 @@ blocked = False
 @app.route("/")
 @app.route("/home", methods=["GET", "POST"])
 def home_page():
-    print(blocked)
+    #print(blocked)
     #Retrieving the authentication token from browser
     if(blocked):
         # response = make_response(render_template("hack.html"))
         # return response
-        print("here!")
+        #print("here!")
         abort(429)
+    # db.drop_collection("")
     auth_token_from_browser = request.cookies.get('auth_token', None)
     #Checking if the user has an auth token present
     if auth_token_from_browser is not None:
@@ -93,19 +93,19 @@ def home_page():
 def echo(ws):
     global ws_set
     #Adding the current WS connection to the set of connections
-    print("webskt:",ws)
+    #print("webskt:",ws)
     # ws_set.add(ws)
-    print(ws_set)
+    #print(ws_set)
     data = b''
     # try:
     data = ws
-    print("msg",data)
+    #print("msg",data)
 
     auth_token_from_browser = request.cookies.get('auth_token', None)
     #Checking if the user has an auth token present
     if auth_token_from_browser is not None:
         #Hashing the token by calling the SHA256 function
-        print("auth ")
+        #print("auth ")
         encrypt_auth_token = sha256(auth_token_from_browser.encode()).digest()
         #Checking whether the DB contains that auth token 
         if(get_auth_tokens(db, encrypt_auth_token)):
@@ -114,7 +114,7 @@ def echo(ws):
                 #If so, updating the unique ID of the new message
                 update_id(db)
                 #Inserting the message into the DB using splicing
-                # print(get_auth_tokens(db, encrypt_auth_token)["username"])
+                # #print(get_auth_tokens(db, encrypt_auth_token)["username"])
                 data["title"] = escape(data["title"])
                 data["description"] = escape(data["description"])
                 data["choice1"] = escape(data["choice1"])
@@ -125,9 +125,12 @@ def echo(ws):
                 data["image"] = (data["image"])
                 # if(data["username"])
                 id_ = insert_message_websocket(db, data, get_auth_tokens(db, encrypt_auth_token)["username"])
-                # print(id_)
+                # #print(id_)
                 data.update({"username" : get_auth_tokens(db, encrypt_auth_token)["username"]})
                 data.update({"id":id_})
+                img=insert_image(db)
+                data.update({"image":img})
+
                 # if()
                 # get_data = get_file(db)
                 # if(get_data["image"]!=None):
@@ -135,35 +138,65 @@ def echo(ws):
                 # else:
                 #     data.update({"image":"quizicon.ico"})
                 # data.update({"id" : get_auth_tokens(db, encrypt_auth_token)["username"]})
-                # print(data)
+                # #print(data)
             #Checking if the incoming request is an answer to a question
             elif data["messageType"] == "questionAnswer":
                 # if(data["correctornot"] == True):
+                #print("the question?")
                 if(get_auth_tokens(db, encrypt_auth_token)["username"]==data["username"]):
+                    #print("same guy!")
                     pass
                 else:
-                    print(get_auth_tokens(db, encrypt_auth_token)["username"])
-                    print(data["username"])
+                    #print(get_auth_tokens(db, encrypt_auth_token)["username"])
+                    #print(data["username"])
                     answer(db,data,data["correctornot"],get_auth_tokens(db, encrypt_auth_token)["username"])
-                # else:
+                    # else:
 
                 #"selected": selected, "correctornot": selected == correct_answer_value}));
             # mute
                 # data["selected":selected]
+            
             data = dumps(data)
-            # print("sending",data)
+            # #print("sending",data)
             #Sending the WS response using send for each socket connection
             # send_to_all(data)
-            print("daaaaaaaata",data)
-            emit("ws_response", data, broadcast=True)
+            data = loads(data)
+            data.update({"time":10})
+            if(data["messageType"]=="chatMessage"):
+                data = dumps(data)
+                #print("daaaaaaaata",data)
+                emit("ws_response", data, broadcast=True)
+            else:
+                if(get_auth_tokens(db, encrypt_auth_token)["username"]==data["username"]):
+                    pass
+                else:
+                    data = dumps(data)
+                    emit("answer_resp", data, broadcast=True)
+
+
+@sock.on('timer')
+def handletimer(data):
+    if(data["time"]<=0):
+        disable_ans_question(db,data["question"],data["username"])
+        return
+    #print("timer")
+    #print(data)
+    # enable_ans_question(db,data["question"],data["username"])
+    data.update({"time":int(data["time"]-1)})
+    time.sleep(1)
+    emit("time_resp",data)
+    if(data["time"]==0):
+        disable_ans_question(db,data["question"],data["username"])
+        return
+
 
 # def send_to_all(data):
 #     global ws_set
-#     print(f'There are {len(ws_set)} connections: they are: {ws_set}')
+#     #print(f'There are {len(ws_set)} connections: they are: {ws_set}')
 #     for socket in ws_set:
 #         if not socket.close:
 #             socket.send(data)
-#             print(f"Data sent to: {socket}")
+#             #print(f"Data sent to: {socket}")
 
 #Decorator to turn Python function style_page into Flask view function
 @app.route('/static/css/<path:file_path>')
@@ -230,13 +263,13 @@ def visit_counter_cookie():
 
 @app.before_request
 def rate_limits():
-    # print(time.time())
-    print(request.remote_addr)
+    # #print(time.time())
+    #print(request.remote_addr)
     current_time=time.time()
     if request.remote_addr not in requested_ip_list:
         requested_ip_list[str(request.remote_addr)] = [0,current_time,False]
     else:
-        # print(current_time-requested_ip_list[request.remote_addr][1])
+        # #print(current_time-requested_ip_list[request.remote_addr][1])
         if(current_time-requested_ip_list[str(request.remote_addr)][1]>30):
             requested_ip_list[str(request.remote_addr)] = [0,current_time,False]
 
@@ -285,7 +318,7 @@ def grade():
     #Returning the finished response
     # if(users)
         try:
-            # print(json_util.dumps(users))
+            # #print(json_util.dumps(users))
             return abort(401)
         except Exception as e:
             make_response(f"")
@@ -321,13 +354,13 @@ def grade_get():
     # response.headers['Content-Type'] = 'text/html; charset=utf-8'    
         #Returning the finished response
         try:
-            print(json_util.dumps(users))
+            #print(json_util.dumps(users))
 
             return json_util.dumps(users).encode()
         except Exception as e:
             make_response(f"")
     #Returning the finished response
-    # print(json_util.dumps(users))
+    # #print(json_util.dumps(users))
     return abort(401)
 
 #Decorator to turn Python function chat_message into Flask view function
@@ -335,14 +368,14 @@ def grade_get():
 def chat_message():
     #Retrieving the entire body of the request by calling get_data()
     body = request.get_data().decode()
-    # print(f"body: {body}")
+    # #print(f"body: {body}")
     #Splitting the body at the comma to separate the title from the description
     body = body.split(",", -1)
     for element in range(len(body)):
         body[element] = body[element].split(":")[1].replace("\"","")
         body[element] = body[element].replace("{","")
         body[element] = body[element].replace("}","")
-    # print(body)
+    # #print(body)
     #Removing the key from the title value, leaving just the title the user entered
     # body[0] = body[0].replace("{\"title\":\"", "")
     # body[0] = body[0][0:-1]
@@ -359,8 +392,8 @@ def chat_message():
         if(get_auth_tokens(db, encrypt_auth_token)):
             #If so, updating the unique ID of the new message
             update_id(db)
-            # print("e", encrypt_auth_token)
-            # print(get_auth_tokens(db, encrypt_auth_token))
+            # #print("e", encrypt_auth_token)
+            # #print(get_auth_tokens(db, encrypt_auth_token))
             #Inserting the message into the DB using splicing
             insert_message_websocket(db, body, get_auth_tokens(db, encrypt_auth_token)["username"])
     #Calling make_response to make an empty flask response
@@ -370,12 +403,12 @@ def chat_message():
 #Commented to test functionality of websocket. If this is commented and new chat messages appear, websocket is the only functionality that enables this.
 # @app.before_request
 # def rate_limit():
-#     # print(time.time())
+#     # #print(time.time())
 #     if request.remote_addr not in requested_ip_list:
-#         print("omg")
+#         #print("omg")
 #         requested_ip_list[request.remote_addr] = time.time()
 #     else:
-#         # print(requested_ip_list[request.remote_addr])
+#         # #print(requested_ip_list[request.remote_addr])
 #         if(time.time()-requested_ip_list[request.remote_addr]>50):
 #             response = make_response("are you trying to hack me bro?????????")
 #             return response
@@ -394,22 +427,22 @@ def m():
     token = request.args.get("token")
     user=request.args.get("username")
     verified = verify_email(db,token,user)
-    return make_response("checkyourbox.html")
+    return redirect(url_for("home_page"))
 
 #Decorator to turn Python function register_user into Flask view function
 @app.route('/register', methods=["POST"])
 def register_user():
-    # print(request.get_data())
+    # #print(request.get_data())
     #Retrieving the entire body of the request by calling get_data()
     creds = request.get_data().decode()
-    # print(creds)
+    # #print(creds)
     #Splitting the body to store the username (0) and password (1) inside creds
     creds = creds.split('&')
     #Removing key from username/password to leave just the username/password
     creds[0] = creds[0].replace("username_reg=", "")
     creds[2] = creds[2].replace("password_reg=", "")
     creds[1] = creds[1].replace("email_reg=", "")
-    print(creds)
+    #print(creds)
     #Escaping any HTML tags that user put in their username
     creds[0] = escape(creds[0])
     #Inserting creds into DB by calling function from dbhandler.py
@@ -428,7 +461,7 @@ def register_user():
     token = add_email_token(db, creds,creds_stored, encrypt_auth_token)
     #Calling make_response to make and send a Flask response
     response = redirect(url_for('home_page'))
-    print(creds[1])
+    #print(creds[1])
     msg = Message(subject="Verify your email",
                         sender="codedemons312@gmail.com",
                         recipients=[creds[1].split("%40")[0]+"@"+creds[1].split("%40")[1]], # replace with your email for testing
@@ -438,7 +471,7 @@ def register_user():
     #Make cookie of auth_token
     # response.set_cookie('auth_token', gen_auth_token, max_age=3600, httponly=True) 
     #Sending a redirect to the home page by calling redirect() and url_for()
-    return redirect(url_for('home_page'))
+    return make_response(render_template("checkyourbox.html"))
 
 
 #Decorator to turn Python function login_page into Flask view function
@@ -478,11 +511,11 @@ def image():
     auth_token_from_browser = request.cookies.get('auth_token', None)
     #Checking if the user has an auth token present
     if auth_token_from_browser is not None:
-        print("I HAVE IMAGED!\r\n\r\n")
+        #print("I HAVE IMAGED!\r\n\r\n")
         #Hashing the token by calling the SHA256 function
         encrypt_auth_token = sha256(auth_token_from_browser.encode()).digest()
         #Checking whether the DB contains that auth token 
-        print("files",request.files)
+        #print("files",request.files)
         if(get_auth_tokens(db, encrypt_auth_token)):
             #Retrieve the data 
             # print
@@ -491,7 +524,7 @@ def image():
                 if file.filename == "":
                     return redirect(url_for('home_page'))
                 image_name = insert_image(db)
-                print(image_name)
+                #print(image_name)
                 file.save(image_name)
     
     # Obtain the unencrypted password
@@ -529,6 +562,7 @@ def submit_answer():
         #Checking whether the DB contains that auth token 
         if(get_auth_tokens(db, encrypt_auth_token)):
             pass
+
 
     return redirect(url_for('home_page'))
 
